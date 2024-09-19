@@ -14,7 +14,7 @@ PlanPal is a web-based application (based on reactjs) designed to help you manag
 
 ## Installation
 
-1. Clone the repository: `git clone https://github.com/your-username/planpal.git`
+1. Clone the repository: `git clone https://github.com/NickDeVeau/planpal.git`
 2. Navigate to the project directory: `cd planpal`
 3. Install dependencies: `npm install`
 4. Start the application: `npm start`

@@ -1,0 +1,19 @@
+.large-message {
+    width: 735px;
+    height: 76px;
+    flex-shrink: 0;
+    color: #000;
+    font-family: Inter;
+    font-size: 32px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    text-align: center;
+    font-feature-settings: 'liga' off, 'clig' off;
+    
+    /* Centering properties */
+    position: absolute;
+    top: 400px;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}

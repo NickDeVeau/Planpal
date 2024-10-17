@@ -1,0 +1,54 @@
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 25px;
+    width: 100%;
+    height: 60px;
+    background: var(--Colour-Background-Light-Grey, #FBFBFD);
+    box-sizing: border-box;
+    z-index: 1;
+}
+
+.title {
+    color: var(--Colour-Main-Grey-900, #141719);
+    font-feature-settings: 'liga' off, 'clig' off;
+    font-family: 'Roboto', sans-serif;
+    font-size: 26px;
+    font-weight: 900;
+    line-height: 38px;
+    text-decoration: none; /* Add this line to remove underline */
+}
+
+.nav-buttons-container {
+    display: flex;
+    gap: 29px;
+    justify-content: flex-end;
+}
+
+.nav-button {
+    background-color: #141719;
+    width: 109px;
+    height: 26px;
+    color: white;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: var(--colour-secondary-white-100-general, #FFF);
+    text-align: center;
+    font-feature-settings: 'liga' off, 'clig' off;
+    
+    /* Medium 12 */
+    font-family: Roboto;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 18px; /* 150% */
+}

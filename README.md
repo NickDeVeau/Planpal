@@ -1,4 +1,4 @@
-# **PlanPal**
+# **Planpal**
 
 PlanPal is a web-based task management application designed to help users manage tasks and schedules effectively across desktop and mobile platforms.
 

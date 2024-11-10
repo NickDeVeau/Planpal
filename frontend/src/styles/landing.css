@@ -11,9 +11,16 @@
     text-align: center;
     font-feature-settings: 'liga' off, 'clig' off;
     
-    /* Centering properties */
     position: absolute;
     top: 400px;
     left: 50%;
     transform: translate(-50%, -50%);
+}
+
+.task-item {
+    list-style-type: none;
+    padding: 8px;
+    margin: 5px 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
 }

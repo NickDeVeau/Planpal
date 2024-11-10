@@ -52,3 +52,20 @@
     line-height: 100%;
 }
   
+
+.login-button {
+    width: 100%;
+    padding: 10px;
+    background-color: #4CAF50; 
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: background-color 0.3s;
+}
+
+.login-button:hover {
+    background-color: #45a049; 
+}

@@ -1,158 +1,238 @@
-import React, { useState, useEffect } from 'react';
-import './dashboard.css';
-import Sidebar from '../../components/Sidebar/Sidebar';
-import MainContent from '../../components/MainContent/MainContent';
-import RightSidebar from '../../components/RightSidebar/RightSidebar';
+import React, { useState, useEffect } from "react";
+import "./dashboard.css";
 
 const Dashboard = () => {
-    const [tasks, setTasks] = useState([]);
-    const [newTaskTitle, setNewTaskTitle] = useState('');
-    const [newTaskPriority, setNewTaskPriority] = useState('');
-    const [newTaskDescription, setNewTaskDescription] = useState('');
-    const [newTaskDueDate, setNewTaskDueDate] = useState('');
-    const [currentDate, setCurrentDate] = useState(new Date()); 
-    const [isExpanded, setIsExpanded] = useState(false); 
-    const [isRightSidebarExpanded, setIsRightSidebarExpanded] = useState(false); 
-    const [showMenu, setShowMenu] = useState(null);
-    const [editingTaskId, setEditingTaskId] = useState(null);
-    const [editTaskTitle, setEditTaskTitle] = useState('');
-    const [editTaskPriority, setEditTaskPriority] = useState('');
-    const [editTaskDescription, setEditTaskDescription] = useState('');
-    const [editTaskDueDate, setEditTaskDueDate] = useState('');
+  const [projects, setProjects] = useState([]);
+  const [selectedTab, setSelectedTab] = useState("overview");
+  const [tasks, setTasks] = useState([]);
+  const [events, setEvents] = useState([]);
 
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setCurrentDate(new Date());
-        }, 60000);
-
-        setTasks([
+  // Fetch Projects Mock Data
+  const fetchProjects = async () => {
+    const mockProjects = [
+      {
+        id: "1",
+        name: "Personal Tasks",
+        type: "personal",
+        categories: {
+          General: [
             {
-                id: 1,
-                title: 'Frontend | Task Name',
-                priority: 'High',
-                description: 'Description',
-                dueDate: 'Due Tomorrow'
+              id: "t1",
+              title: "Buy groceries",
+              completed: false,
+              priority: "low",
+              description: "Get milk, bread, and eggs.",
+              dueDate: "2024-11-26",
             },
             {
-                id: 2,
-                title: 'Frontend | Task Name',
-                priority: 'Low',
-                description: 'Description',
-                dueDate: 'Due 9/10/2024'
+              id: "t2",
+              title: "Finish project report",
+              completed: true,
+              priority: "high",
+              description: "Complete the software engineering report.",
+              dueDate: "2024-11-27",
             },
-        ]);
+          ],
+        },
+        events: [
+          {
+            id: "e1",
+            title: "Doctor's Appointment",
+            date: "2024-11-26",
+            priority: "medium",
+          },
+        ],
+      },
+      {
+        id: "2",
+        name: "Team Collaboration",
+        type: "shared",
+        categories: {
+          Frontend: [
+            {
+              id: "t3",
+              title: "Build Navbar",
+              completed: false,
+              priority: "medium",
+              description: "Develop the main site navigation.",
+              dueDate: "2024-11-28",
+            },
+          ],
+          Backend: [
+            {
+              id: "t4",
+              title: "Setup Database",
+              completed: false,
+              priority: "high",
+              description: "Configure Firestore for the app.",
+              dueDate: "2024-11-29",
+            },
+          ],
+        },
+        events: [
+          {
+            id: "e2",
+            title: "Team Meeting",
+            date: "2024-11-26",
+            priority: "high",
+          },
+        ],
+      },
+    ];
 
-        return () => clearInterval(interval);
-    }, []);
+    setProjects(mockProjects);
 
-    const addTask = () => {
-        if (!newTaskTitle.trim()) return;
-
-        const newTask = {
-            id: Date.now(), 
-            title: newTaskTitle,
-            priority: newTaskPriority,
-            description: newTaskDescription,
-            dueDate: newTaskDueDate
-        };
-
-        setTasks([...tasks, newTask]); 
-
-        setNewTaskTitle('');
-        setNewTaskPriority('');
-        setNewTaskDescription('');
-        setNewTaskDueDate('');
-    };
-
-    const deleteTask = (id) => {
-        setTasks(tasks.filter(task => task.id !== id));
-        setShowMenu(null);
-    };
-
-    const editTask = (id) => {
-        const task = tasks.find((task) => task.id === id);
-        if (task) {
-            setEditingTaskId(id); 
-            setEditTaskTitle(task.title);
-            setEditTaskPriority(task.priority);
-            setEditTaskDescription(task.description);
-            setEditTaskDueDate(task.dueDate);
-        }
-        setShowMenu(null); 
-    };
-
-    const saveTask = () => {
-        const updatedTasks = tasks.map((task) =>
-            task.id === editingTaskId
-                ? {
-                      ...task,
-                      title: editTaskTitle,
-                      priority: editTaskPriority,
-                      description: editTaskDescription,
-                      dueDate: editTaskDueDate,
-                  }
-                : task
-        );
-        setTasks(updatedTasks);
-        setEditingTaskId(null); 
-    };
-
-    const formatDate = (date) => {
-        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        return date.toLocaleDateString(undefined, options);
-    };
-
-    const toggleExpand = () => {
-        setIsExpanded(!isExpanded); 
-    };
-
-    const toggleRightSidebarExpand = () => {
-        setIsRightSidebarExpanded(!isRightSidebarExpanded); 
-    };
-
-    const toggleMenu = (taskId) => {
-        setShowMenu(showMenu === taskId ? null : taskId); 
-    };
-
-    return (
-        <div className="body">
-            <Sidebar />
-            <MainContent
-                tasks={tasks}
-                currentDate={currentDate}
-                isExpanded={isExpanded}
-                newTaskTitle={newTaskTitle}
-                newTaskPriority={newTaskPriority}
-                newTaskDescription={newTaskDescription}
-                newTaskDueDate={newTaskDueDate}
-                setNewTaskTitle={setNewTaskTitle}
-                setNewTaskPriority={setNewTaskPriority}
-                setNewTaskDescription={setNewTaskDescription}
-                setNewTaskDueDate={setNewTaskDueDate}
-                addTask={addTask}
-                toggleExpand={toggleExpand}
-                showMenu={showMenu}
-                toggleMenu={toggleMenu}
-                editTask={editTask}
-                deleteTask={deleteTask}
-                editingTaskId={editingTaskId}
-                editTaskTitle={editTaskTitle}
-                editTaskPriority={editTaskPriority}
-                editTaskDescription={editTaskDescription}
-                editTaskDueDate={editTaskDueDate}
-                setEditTaskTitle={setEditTaskTitle}
-                setEditTaskPriority={setEditTaskPriority}
-                setEditTaskDescription={setEditTaskDescription}
-                setEditTaskDueDate={setEditTaskDueDate}
-                saveTask={saveTask}
-                formatDate={formatDate}
-            />
-            <RightSidebar
-                isRightSidebarExpanded={isRightSidebarExpanded}
-                toggleRightSidebarExpand={toggleRightSidebarExpand}
-            />
-        </div>
+    // Aggregate all tasks and events for the overview tab
+    const allTasks = mockProjects.flatMap((project) =>
+      Object.values(project.categories).flat()
     );
+    const allEvents = mockProjects.flatMap((project) => project.events);
+
+    setTasks(allTasks);
+    setEvents(allEvents);
+  };
+
+  useEffect(() => {
+    fetchProjects();
+  }, []);
+
+  return (
+    <div className="dashboard-container">
+      {/* Sidebar */}
+      <aside className="sidebar">
+        <h2>Projects</h2>
+        <ul>
+          <li
+            className={selectedTab === "overview" ? "active" : ""}
+            onClick={() => setSelectedTab("overview")}
+          >
+            Overview
+          </li>
+          {projects.map((project) => (
+            <li
+              key={project.id}
+              className={selectedTab === project.id ? "active" : ""}
+              onClick={() => setSelectedTab(project.id)}
+            >
+              {project.name} {project.type === "shared" && <span>(Shared)</span>}
+            </li>
+          ))}
+        </ul>
+        <button className="add-project-btn">+ Add Project</button>
+      </aside>
+
+      {/* Main Content */}
+      <main className="main-content">
+        {selectedTab === "overview" ? (
+          <>
+            <h2>Today's Overview</h2>
+            <div className="panel-container">
+              {/* Tasks Panel */}
+              <div className="panel">
+                <h3>Tasks</h3>
+                <ul className="tasks-list">
+                  {tasks.map((task) => (
+                    <TaskCard key={task.id} task={task} />
+                  ))}
+                </ul>
+              </div>
+
+              {/* Events Panel */}
+              <div className="panel">
+                <h3>Events</h3>
+                <ul className="events-list">
+                  {events.map((event) => (
+                    <EventCard key={event.id} event={event} />
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            <h2>{projects.find((project) => project.id === selectedTab)?.name}</h2>
+            <div className="panel-container">
+              {/* Project Tasks Panel */}
+              <div className="panel">
+                <h3>Tasks</h3>
+                {projects.find((project) => project.id === selectedTab)?.categories &&
+                  Object.entries(projects.find((project) => project.id === selectedTab).categories).map(
+                    ([category, tasks]) => (
+                      <div key={category}>
+                        <h4>{category}</h4>
+                        <ul className="tasks-list">
+                          {tasks.map((task) => (
+                            <TaskCard key={task.id} task={task} />
+                          ))}
+                        </ul>
+                      </div>
+                    )
+                  )}
+              </div>
+
+              {/* Project Events Panel */}
+              <div className="panel">
+                <h3>Events</h3>
+                <ul className="events-list">
+                  {projects.find((project) => project.id === selectedTab)?.events.map((event) => (
+                    <EventCard key={event.id} event={event} />
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </>
+        )}
+      </main>
+    </div>
+  );
+};
+
+// TaskCard Component
+const TaskCard = ({ task }) => {
+  return (
+    <li className={`task-card priority-${task.priority}`}>
+      <div className="task-header">
+        <div className="completion-status">
+          <input type="checkbox" checked={task.completed} readOnly />
+        </div>
+        <h4 className="task-title">{task.title}</h4>
+        <div className="task-meta">
+          <span className="due-date">Due: {task.dueDate}</span>
+          <span className={`priority-indicator priority-${task.priority}`}>
+            {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
+          </span>
+        </div>
+      </div>
+      <p className="task-description">{task.description}</p>
+      <div className="task-footer">
+        <div className="task-actions">
+          <button className="edit-btn">Edit</button>
+          <button className="delete-btn">Delete</button>
+        </div>
+      </div>
+    </li>
+  );
+};
+
+// EventCard Component
+const EventCard = ({ event }) => {
+  return (
+    <li className={`event-card priority-${event.priority}`}>
+      <div className="event-header">
+        <h4 className="event-title">{event.title}</h4>
+        <div className="event-meta">
+          <span className="event-date">{event.date}</span>
+          <span className={`priority-indicator priority-${event.priority}`}>
+            {event.priority.charAt(0).toUpperCase() + event.priority.slice(1)}
+          </span>
+        </div>
+      </div>
+      <div className="event-footer">
+        <button className="edit-btn">Edit</button>
+        <button className="delete-btn">Delete</button>
+      </div>
+    </li>
+  );
 };
 
 export default Dashboard;

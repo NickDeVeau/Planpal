@@ -1,19 +1,28 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Landing from './pages/Landing/Landing.js';
-import Signin from './pages/Signin/Signin.js';
-import Register from './pages/Register/Register.js';
-import Dashboard from './pages/Dashboard/Dashboard.js';
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Landing from "./pages/Landing/Landing";
+import Signin from "./pages/Signin/Signin";
+import Register from "./pages/Register/Register";
+import Dashboard from "./pages/Dashboard/Dashboard";
 
 function App() {
   return (
     <Router>
-      <Routes>
-          <Route index element={<Landing />} />
+      <div className="App">
+        <Routes>
+          {/* Landing Page */}
+          <Route path="/" element={<Landing />} />
+
+          {/* Sign In Page */}
           <Route path="/signin" element={<Signin />} />
+
+          {/* Register Page */}
           <Route path="/register" element={<Register />} />
+
+          {/* Dashboard */}
           <Route path="/dashboard" element={<Dashboard />} />
-      </Routes>
+        </Routes>
+      </div>
     </Router>
   );
 }

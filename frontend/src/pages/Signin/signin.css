@@ -1,4 +1,4 @@
-.register-container {
+.signin-container {
     max-width: 400px;
     margin: 5rem auto;
     padding: 2rem;
@@ -8,16 +8,16 @@
     text-align: center;
   }
   
-  .register-container h1 {
+  .signin-container h1 {
     margin-bottom: 1.5rem;
   }
   
-  .register-container form {
+  .signin-container form {
     display: flex;
     flex-direction: column;
   }
   
-  .register-container input {
+  .signin-container input {
     margin-bottom: 1rem;
     padding: 0.5rem;
     font-size: 1rem;
@@ -25,13 +25,13 @@
     border-radius: 5px;
   }
   
-  .register-container .error {
+  .signin-container .error {
     color: red;
     font-size: 0.9rem;
     margin-bottom: 1rem;
   }
   
-  .register-container button {
+  .signin-container button {
     padding: 0.7rem;
     font-size: 1rem;
     color: white;
@@ -41,7 +41,7 @@
     cursor: pointer;
   }
   
-  .register-container button:hover {
+  .signin-container button:hover {
     background-color: #0056b3;
   }
   

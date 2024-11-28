@@ -8,9 +8,9 @@ body, html {
 
 /* Scoped Styles for Event Cards */
 .dashboard-container .events-list .event-card {
-  border: 1px solid #e9ecef;
+  border: 1px solid var(--border-color);
   border-radius: 10px;
-  background-color: #ffffff;
+  background-color: var(--card-bg-color);
   padding: 1rem;
   margin-bottom: 1rem;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -26,6 +26,7 @@ body, html {
 .dashboard-container .events-list .event-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+  background-color: var(--hover-color);
 }
 
 /* Header Section */
@@ -57,7 +58,7 @@ body, html {
   font-size: 1.2rem;
   font-weight: bold;
   margin: 0;
-  color: #343a40;
+  color: var(--dark-text-color);
   padding-left: 40px; /* Add padding to avoid overlap with checkbox */
   display: flex;
   align-items: center;
@@ -87,25 +88,25 @@ body, html {
 }
 
 .dashboard-container .events-list .priority-low {
-  border: 1px solid #28a745;
-  color: #28a745;
+  border: 1px solid var(--success-color);
+  color: var(--success-color);
 }
 
 .dashboard-container .events-list .priority-medium {
-  border: 1px solid #ffc107;
-  color: #ffc107;
+  border: 1px solid var(--warning-color);
+  color: var(--warning-color);
 }
 
 .dashboard-container .events-list .priority-high {
-  border: 1px solid #dc3545;
-  color: #dc3545;
+  border: 1px solid var(--danger-color);
+  color: var(--danger-color);
 }
 
 /* Description Section */
 .dashboard-container .events-list .event-description {
   grid-area: description;
   font-size: 1rem;
-  color: #495057;
+  color: var(--medium-text-color);
   margin-bottom: 0.5rem;
   line-height: 1.5;
 }
@@ -149,19 +150,6 @@ body, html {
 
 .dashboard-container .events-list .delete-btn:hover {
   background-color: #c82333;
-}
-
-/* Scoped Priority Styles with Borders */
-.dashboard-container .events-list .priority-low {
-  border: 1px solid rgba(40, 167, 69, 0.5);
-}
-
-.dashboard-container .events-list .priority-medium {
-  border: 1px solid rgba(255, 193, 7, 0.5);
-}
-
-.dashboard-container .events-list .priority-high {
-  border: 1px solid rgba(220, 53, 69, 0.5);
 }
 
 /* Options Button and Menu */

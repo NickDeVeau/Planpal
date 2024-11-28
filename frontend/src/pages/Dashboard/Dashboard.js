@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import "../../global.css"; // Import global CSS
 import "./dashboard.css";
 import TaskCard from "../../components/TaskCard/TaskCard";
 import EventCard from "../../components/EventCard/EventCard";

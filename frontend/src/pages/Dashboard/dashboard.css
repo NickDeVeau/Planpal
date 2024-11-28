@@ -4,6 +4,7 @@ body, html {
   padding: 0;
   box-sizing: border-box;
   font-family: 'Roboto', sans-serif;
+  color: var(--text-color);
 }
 
 /* Scoped Styles for Task and Event Cards */
@@ -11,7 +12,7 @@ body, html {
 .dashboard-container .events-list .event-card {
   border: 1px solid #e9ecef;
   border-radius: 10px;
-  background-color: #ffffff;
+  background-color: var(--card-bg-color);
   padding: 1rem;
   margin-bottom: 1rem;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -28,6 +29,7 @@ body, html {
 .dashboard-container .events-list .event-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+  background-color: var(--hover-bg-color);
 }
 
 /* Header Section */
@@ -63,7 +65,7 @@ body, html {
   font-size: 1.2rem;
   font-weight: bold;
   margin: 0;
-  color: #343a40;
+  color: var(--dark-text-color);
   padding-left: 40px; /* Add padding to avoid overlap with checkbox */
   display: flex;
   align-items: center;
@@ -79,7 +81,7 @@ body, html {
 .dashboard-container .tasks-list .due-date,
 .dashboard-container .events-list .event-date {
   font-size: 0.9rem;
-  color: #6c757d;
+  color: var(--medium-text-color);
 }
 
 .dashboard-container .tasks-list .priority-indicator,
@@ -93,20 +95,20 @@ body, html {
 
 .dashboard-container .tasks-list .priority-low,
 .dashboard-container .events-list .priority-low {
-  border: 1px solid #28a745;
-  color: #28a745;
+  border: 1px solid var(--success-color);
+  color: var(--success-color);
 }
 
 .dashboard-container .tasks-list .priority-medium,
 .dashboard-container .events-list .priority-medium {
-  border: 1px solid #ffc107;
-  color: #ffc107;
+  border: 1px solid var(--warning-color);
+  color: var(--warning-color);
 }
 
 .dashboard-container .tasks-list .priority-high,
 .dashboard-container .events-list .priority-high {
-  border: 1px solid #dc3545;
-  color: #dc3545;
+  border: 1px solid var(--danger-color);
+  color: var(--danger-color);
 }
 
 /* Description Section */
@@ -114,7 +116,7 @@ body, html {
 .dashboard-container .events-list .event-description {
   grid-area: description;
   font-size: 1rem;
-  color: #495057;
+  color: var(--light-text-color);
   margin-bottom: 0.5rem;
   line-height: 1.5;
 }
@@ -198,16 +200,17 @@ body, html {
 .dashboard-container {
   display: flex;
   height: 100vh;
-  background-color: #f4f6f9;
-  color: #333;
+  background-color: var(--tertiary-color);
+  color: var(--text-color);
   font-family: 'Roboto', sans-serif;
   overflow: hidden;
+  background-color: var(--tertiary-color);
 }
 
 /* Sidebar Styling */
 .sidebar {
   width: 250px;
-  background: #007bff; /* Brighter blue */
+  background: var(--primary-color); /* Brighter blue */
   color: white;
   padding: 1.5rem;
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
@@ -215,6 +218,8 @@ body, html {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  background: var(--primary-color);
+  color: var(--secondary-color);
 }
 
 .sidebar .user-info {
@@ -250,22 +255,24 @@ body, html {
   margin-bottom: 0.5rem;
   border-radius: 5px;
   cursor: pointer;
-  background-color: #0056b3; /* Brighter dark blue */
+  background-color: var(--button-background-color);
   transition: background-color 0.3s;
+  background-color: var(--sidebar-link-bg-color);
 }
 
 .sidebar li.active {
-  background-color: #ffc107; /* Bright yellow */
-  color: #343a40;
+  background-color: var(--secondary-color); /* Bright yellow */
+  color: var(--primary-color);
 }
 
 .sidebar li:hover {
-  background-color: #004494; /* Slightly darker blue for hover */
+  background-color: var(--button-hover-background-color);
+  background-color: var(--sidebar-link-hover-bg-color);
 }
 
 .add-project-btn {
-  background: #ffc107; /* Bright yellow */
-  color: #343a40;
+  background: var(--button-bg-color);
+  color: var(--button-text-color);
   font-weight: bold;
   border: none;
   border-radius: 5px;
@@ -274,10 +281,13 @@ body, html {
   margin-top: 1rem;
   width: 100%;
   transition: background-color 0.3s;
+  background: var(--button-bg-color);
+  color: var(--button-text-color);
 }
 
 .add-project-btn:hover {
-  background: #e0a800; /* Slightly darker yellow for hover */
+  background: var(--button-hover-bg-color);
+  background: var(--button-hover-bg-color);
 }
 
 .settings-btn {
@@ -290,20 +300,66 @@ body, html {
   padding: 0.8rem 1rem;
   text-align: left;
   transition: background-color 0.3s;
+  color: var(--secondary-color);
 }
 
 .settings-btn:hover {
-  background-color: #004494; /* Slightly darker blue for hover */
+  background-color: darken(var(--primary-color), 10%); /* Slightly darker blue for hover */
+  background-color: var(--button-hover-color);
+}
+
+.tasks-list .task-card,
+.events-list .event-card {
+  background-color: var(--card-bg-color);
+}
+
+.tasks-list .task-card:hover,
+.events-list .event-card:hover {
+  background-color: var(--hover-bg-color);
+}
+
+.tasks-list .task-title,
+.events-list .event-title {
+  color: var(--dark-text-color);
+}
+
+.tasks-list .due-date,
+.events-list .event-date {
+  color: var(--medium-text-color);
+}
+
+.tasks-list .task-description,
+.events-list .event-description {
+  color: var(--light-text-color);
+}
+
+.tasks-list .priority-low,
+.events-list .priority-low {
+  border: 1px solid var(--success-color);
+  color: var(--success-color);
+}
+
+.tasks-list .priority-medium,
+.events-list .priority-medium {
+  border: 1px solid var(--warning-color);
+  color: var(--warning-color);
+}
+
+.tasks-list .priority-high,
+.events-list .priority-high {
+  border: 1px solid var(--danger-color);
+  color: var(--danger-color);
 }
 
 /* Main Content */
 .main-content {
   flex: 1;
   padding: 2rem;
-  background-color: #f8f9fa;
+  background-color: var(--tertiary-color);
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+  background-color: var(--tertiary-color);
 }
 
 .panel-container {
@@ -314,12 +370,13 @@ body, html {
 
 .panel {
   flex: 1;
-  background: white;
+  background: var(--secondary-color);
   padding: 1.5rem;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s;
   min-width: 300px;
+  background: var(--secondary-color);
 }
 
 .panel:hover {
@@ -427,8 +484,8 @@ body, html {
 
 .filter-btn,
 .add-section-btn {
-  background: #007bff;
-  color: white;
+  background: var(--button-bg-color);
+  color: var(--button-text-color);
   border: none;
   border-radius: 5px;
   padding: 0.5rem 1rem;
@@ -439,13 +496,13 @@ body, html {
 
 .filter-btn:hover,
 .add-section-btn:hover {
-  background: #0056b3;
+  background: var(--button-hover-bg-color);
   transform: translateY(-2px);
 }
 
 .filter-btn:active,
 .add-section-btn:active {
-  background: #004494;
+  background: var(--button-active-bg-color);
   transform: translateY(0);
 }
 

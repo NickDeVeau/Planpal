@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import "../../global.css"; // Import global CSS
 import "./signin.css";
 
 const Signin = () => {

@@ -1,5 +1,5 @@
-
 import React, { useState } from "react";
+import "../../global.css"; // Import global CSS
 import "./settings.css";
 
 const Settings = () => {

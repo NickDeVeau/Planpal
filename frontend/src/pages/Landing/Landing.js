@@ -1,4 +1,5 @@
 import React from "react";
+import "../../global.css"; // Import global CSS
 import "./landing.css";
 
 const Landing = () => {

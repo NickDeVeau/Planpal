@@ -2,7 +2,7 @@
     max-width: 400px;
     margin: 5rem auto;
     padding: 2rem;
-    border: 1px solid #ddd;
+    border: 1px solid var(--border-color);
     border-radius: 5px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     text-align: center;
@@ -21,12 +21,12 @@
     margin-bottom: 1rem;
     padding: 0.5rem;
     font-size: 1rem;
-    border: 1px solid #ccc;
+    border: 1px solid var(--border-color);
     border-radius: 5px;
   }
   
   .signin-container .error {
-    color: red;
+    color: var(--danger-color);
     font-size: 0.9rem;
     margin-bottom: 1rem;
   }
@@ -34,14 +34,13 @@
   .signin-container button {
     padding: 0.7rem;
     font-size: 1rem;
-    color: white;
-    background-color: #007bff;
+    color: var(--secondary-color);
+    background-color: var(--primary-color);
     border: none;
     border-radius: 5px;
     cursor: pointer;
   }
   
   .signin-container button:hover {
-    background-color: #0056b3;
+    background-color: var(--dark-primary-color);
   }
-  

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./dashboard.css";
+import TaskCard from "../../components/TaskCard/TaskCard";
+import EventCard from "../../components/EventCard/EventCard";
 
 const Dashboard = () => {
   const [projects, setProjects] = useState([]);
@@ -100,25 +102,34 @@ const Dashboard = () => {
     <div className="dashboard-container">
       {/* Sidebar */}
       <aside className="sidebar">
-        <h2>Projects</h2>
-        <ul>
-          <li
-            className={selectedTab === "overview" ? "active" : ""}
-            onClick={() => setSelectedTab("overview")}
-          >
-            Overview
-          </li>
-          {projects.map((project) => (
+        <div className="user-info">
+          <img src="/path/to/avatar.jpg" alt="User Avatar" />
+          <span className="username">Username</span>
+        </div>
+        <div>
+          <h2>Projects</h2>
+          <ul>
             <li
-              key={project.id}
-              className={selectedTab === project.id ? "active" : ""}
-              onClick={() => setSelectedTab(project.id)}
+              className={selectedTab === "overview" ? "active" : ""}
+              onClick={() => setSelectedTab("overview")}
             >
-              {project.name} {project.type === "shared" && <span>(Shared)</span>}
+              Overview
             </li>
-          ))}
-        </ul>
-        <button className="add-project-btn">+ Add Project</button>
+            {projects.map((project) => (
+              <li
+                key={project.id}
+                className={selectedTab === project.id ? "active" : ""}
+                onClick={() => setSelectedTab(project.id)}
+              >
+                {project.name} {project.type === "shared" && <span>(Shared)</span>}
+              </li>
+            ))}
+          </ul>
+          <button className="add-project-btn">+ Add Project</button>
+        </div>
+        <button className="settings-btn" onClick={() => (window.location.href = "/settings")}>
+          Settings
+        </button>
       </aside>
 
       {/* Main Content */}
@@ -129,7 +140,10 @@ const Dashboard = () => {
             <div className="panel-container">
               {/* Tasks Panel */}
               <div className="panel">
-                <h3>Tasks</h3>
+                <div className="tasks-header">
+                  <h3>Tasks</h3>
+                  <button className="filter-btn">Filter By</button>
+                </div>
                 <ul className="tasks-list">
                   {tasks.map((task) => (
                     <TaskCard key={task.id} task={task} />
@@ -154,7 +168,10 @@ const Dashboard = () => {
             <div className="panel-container">
               {/* Project Tasks Panel */}
               <div className="panel">
-                <h3>Tasks</h3>
+                <div className="tasks-header">
+                  <h3>Tasks</h3>
+                  <button className="add-section-btn">+ Add Section</button>
+                </div>
                 {projects.find((project) => project.id === selectedTab)?.categories &&
                   Object.entries(projects.find((project) => project.id === selectedTab).categories).map(
                     ([category, tasks]) => (
@@ -184,54 +201,6 @@ const Dashboard = () => {
         )}
       </main>
     </div>
-  );
-};
-
-// TaskCard Component
-const TaskCard = ({ task }) => {
-  return (
-    <li className={`task-card priority-${task.priority}`}>
-      <div className="task-header">
-        <div className="completion-status">
-          <input type="checkbox" checked={task.completed} readOnly />
-        </div>
-        <h4 className="task-title">{task.title}</h4>
-        <div className="task-meta">
-          <span className="due-date">Due: {task.dueDate}</span>
-          <span className={`priority-indicator priority-${task.priority}`}>
-            {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
-          </span>
-        </div>
-      </div>
-      <p className="task-description">{task.description}</p>
-      <div className="task-footer">
-        <div className="task-actions">
-          <button className="edit-btn">Edit</button>
-          <button className="delete-btn">Delete</button>
-        </div>
-      </div>
-    </li>
-  );
-};
-
-// EventCard Component
-const EventCard = ({ event }) => {
-  return (
-    <li className={`event-card priority-${event.priority}`}>
-      <div className="event-header">
-        <h4 className="event-title">{event.title}</h4>
-        <div className="event-meta">
-          <span className="event-date">{event.date}</span>
-          <span className={`priority-indicator priority-${event.priority}`}>
-            {event.priority.charAt(0).toUpperCase() + event.priority.slice(1)}
-          </span>
-        </div>
-      </div>
-      <div className="event-footer">
-        <button className="edit-btn">Edit</button>
-        <button className="delete-btn">Delete</button>
-      </div>
-    </li>
   );
 };
 

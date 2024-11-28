@@ -1,0 +1,199 @@
+/* General Styles */
+body, html {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Roboto', sans-serif;
+}
+
+/* Scoped Styles for Event Cards */
+.dashboard-container .events-list .event-card {
+  border: 1px solid #e9ecef;
+  border-radius: 10px;
+  background-color: #ffffff;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  display: grid;
+  grid-template-areas:
+    "header header"
+    "description description"
+    "footer footer";
+  gap: 0.5rem;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.dashboard-container .events-list .event-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* Header Section */
+.dashboard-container .events-list .event-header {
+  grid-area: header;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  position: relative;
+}
+
+.dashboard-container .events-list .event-header .completion-status {
+  position: absolute;
+  top: 50%;
+  left: 10px;
+  transform: translateY(-50%);
+}
+
+.dashboard-container .events-list .completion-status input {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  margin: 0;
+  vertical-align: middle;
+}
+
+.dashboard-container .events-list .event-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin: 0;
+  color: #343a40;
+  padding-left: 40px; /* Add padding to avoid overlap with checkbox */
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.dashboard-container .events-list .event-meta {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.dashboard-container .events-list .event-date {
+  font-size: 0.9rem;
+  color: #6c757d;
+  margin-left: auto;
+  margin-right: 1rem;
+}
+
+.dashboard-container .events-list .priority-indicator {
+  padding: 0.3rem 0.6rem;
+  font-size: 0.8rem;
+  font-weight: bold;
+  border-radius: 5px;
+  text-transform: capitalize;
+  margin-left: 0.5rem;
+}
+
+.dashboard-container .events-list .priority-low {
+  border: 1px solid #28a745;
+  color: #28a745;
+}
+
+.dashboard-container .events-list .priority-medium {
+  border: 1px solid #ffc107;
+  color: #ffc107;
+}
+
+.dashboard-container .events-list .priority-high {
+  border: 1px solid #dc3545;
+  color: #dc3545;
+}
+
+/* Description Section */
+.dashboard-container .events-list .event-description {
+  grid-area: description;
+  font-size: 1rem;
+  color: #495057;
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
+}
+
+/* Footer Section */
+.dashboard-container .events-list .event-footer {
+  grid-area: footer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dashboard-container .events-list .event-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.dashboard-container .events-list .edit-btn,
+.dashboard-container .events-list .delete-btn {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.9rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.dashboard-container .events-list .edit-btn {
+  background-color: #ffc107;
+  color: #343a40;
+}
+
+.dashboard-container .events-list .edit-btn:hover {
+  background-color: #e0a800;
+}
+
+.dashboard-container .events-list .delete-btn {
+  background-color: #dc3545;
+  color: #ffffff;
+}
+
+.dashboard-container .events-list .delete-btn:hover {
+  background-color: #c82333;
+}
+
+/* Scoped Priority Styles with Borders */
+.dashboard-container .events-list .priority-low {
+  border: 1px solid rgba(40, 167, 69, 0.5);
+}
+
+.dashboard-container .events-list .priority-medium {
+  border: 1px solid rgba(255, 193, 7, 0.5);
+}
+
+.dashboard-container .events-list .priority-high {
+  border: 1px solid rgba(220, 53, 69, 0.5);
+}
+
+/* Options Button and Menu */
+.options-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  position: relative;
+}
+
+.options-menu {
+  position: absolute;
+  top: 30px;
+  right: 10px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  padding: 0.5rem 0;
+}
+
+.option {
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+
+.option:hover {
+  background: #f1f3f5;
+}
+
+.delete-option {
+  color: red;
+}

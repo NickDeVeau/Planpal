@@ -1,3 +1,4 @@
+
 /* General Styles */
 body, html {
   margin: 0;
@@ -207,32 +208,11 @@ body, html {
 /* Sidebar Styling */
 .sidebar {
   width: 250px;
-  background: #007bff; /* Brighter blue */
+  background: #343a40;
   color: white;
   padding: 1.5rem;
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
   overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.sidebar .user-info {
-  display: flex;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-.sidebar .user-info img {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  margin-right: 1rem;
-}
-
-.sidebar .user-info .username {
-  font-size: 1.2rem;
-  font-weight: bold;
 }
 
 .sidebar h2 {
@@ -250,21 +230,21 @@ body, html {
   margin-bottom: 0.5rem;
   border-radius: 5px;
   cursor: pointer;
-  background-color: #0056b3; /* Brighter dark blue */
+  background-color: #495057;
   transition: background-color 0.3s;
 }
 
 .sidebar li.active {
-  background-color: #ffc107; /* Bright yellow */
+  background-color: #ffc107;
   color: #343a40;
 }
 
 .sidebar li:hover {
-  background-color: #004494; /* Slightly darker blue for hover */
+  background-color: #6c757d;
 }
 
 .add-project-btn {
-  background: #ffc107; /* Bright yellow */
+  background: #ffc107;
   color: #343a40;
   font-weight: bold;
   border: none;
@@ -277,23 +257,7 @@ body, html {
 }
 
 .add-project-btn:hover {
-  background: #e0a800; /* Slightly darker yellow for hover */
-}
-
-.settings-btn {
-  background: none;
-  border: none;
-  color: white;
-  font-size: 1rem;
-  cursor: pointer;
-  margin-top: auto;
-  padding: 0.8rem 1rem;
-  text-align: left;
-  transition: background-color 0.3s;
-}
-
-.settings-btn:hover {
-  background-color: #004494; /* Slightly darker blue for hover */
+  background: #e0a800;
 }
 
 /* Main Content */
@@ -413,50 +377,3 @@ body, html {
   margin-top: 0.5rem;
   line-height: 1.5;
 }
-
-/* ...existing code... */
-
-.tasks-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem; /* Add padding to create space */
-  border-bottom: 1px solid #e9ecef; /* Optional: Add a bottom border for separation */
-}
-
-.filter-btn,
-.add-section-btn {
-  background: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  padding: 0.5rem 1rem;
-  cursor: pointer;
-  transition: background-color 0.3s, transform 0.3s;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.filter-btn:hover,
-.add-section-btn:hover {
-  background: #0056b3;
-  transform: translateY(-2px);
-}
-
-.filter-btn:active,
-.add-section-btn:active {
-  background: #004494;
-  transform: translateY(0);
-}
-
-.overview-header,
-.project-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-/* ...existing code... */
-
-/* ...existing code... */

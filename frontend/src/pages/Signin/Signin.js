@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import "../../global.css"; // Import global CSS
 import "./signin.css";
+import { auth } from "../../firebase"; // Import auth from firebase.js
 
 const Signin = () => {
   const [email, setEmail] = useState("");
@@ -10,11 +11,9 @@ const Signin = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const auth = getAuth();
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      alert("Sign-in successful!");
       window.location.href = "/dashboard"; // Navigate to Dashboard after success
     } catch (err) {
       setError(err.message);

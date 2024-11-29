@@ -1,5 +1,6 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import "./global.css"; // Import global CSS
 import Landing from "./pages/Landing/Landing";
 import Signin from "./pages/Signin/Signin";
 import Register from "./pages/Register/Register";

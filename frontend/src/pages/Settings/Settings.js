@@ -1,9 +1,37 @@
-
 import React, { useState } from "react";
+import { getAuth, signOut, deleteUser } from "firebase/auth";
+import { doc, deleteDoc } from "firebase/firestore";
+import { db } from "../../firebase"; // Import db from firebase.js
+import "../../global.css"; // Import global CSS
 import "./settings.css";
 
 const Settings = () => {
   const [selectedSection, setSelectedSection] = useState("profile");
+  const auth = getAuth();
+  const user = auth.currentUser;
+
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+      window.location.href = "/"; // Navigate to Landing page after sign-out
+    } catch (err) {
+      console.error("Error signing out: ", err);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (user) {
+      try {
+        // Delete user data from Firestore
+        await deleteDoc(doc(db, "users", user.uid));
+        // Delete user from Firebase Auth
+        await deleteUser(user);
+        window.location.href = "/"; // Navigate to Landing page after account deletion
+      } catch (err) {
+        console.error("Error deleting account: ", err);
+      }
+    }
+  };
 
   const renderSection = () => {
     switch (selectedSection) {
@@ -19,6 +47,8 @@ const Settings = () => {
           <div className="settings-content">
             <h3>Account Settings</h3>
             {/* Add account settings options here */}
+            <button onClick={handleSignOut}>Sign Out</button>
+            <button onClick={handleDeleteAccount} className="delete-button">Delete Account</button>
           </div>
         );
       case "notifications":

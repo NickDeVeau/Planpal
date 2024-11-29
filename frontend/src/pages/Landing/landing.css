@@ -21,8 +21,8 @@ body, html, div, h1, p, a, img {
   justify-content: space-between;
   align-items: center;
   padding: 1rem 2rem;
-  background-color: #f8f9fa;
-  border-bottom: 1px solid #e9ecef;
+  background-color: var(--tertiary-color);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .landing-header .logo {
@@ -32,17 +32,21 @@ body, html, div, h1, p, a, img {
 .landing-header nav a {
   margin-left: 1rem;
   text-decoration: none;
-  color: #007bff;
+  color: var(--primary-color);
   font-size: 1rem;
 }
 
 .landing-header nav .cta-button {
-  background-color: #007bff;
-  color: #fff;
+  background-color: var(--primary-color);
+  color: var(--secondary-color);
   padding: 0.5rem 1rem;
   border-radius: 5px;
   text-decoration: none;
   font-weight: bold;
+}
+
+.landing-header nav .cta-button:hover {
+  background-color: var(--dark-primary-color);
 }
 
 /* Main Section */
@@ -54,8 +58,8 @@ body, html, div, h1, p, a, img {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(120deg, #007bff, #0056b3);
-  color: #fff;
+  background: linear-gradient(120deg, var(--primary-color), var(--dark-primary-color));
+  color: var(--secondary-color);
 }
 
 .landing-main h1 {
@@ -69,8 +73,8 @@ body, html, div, h1, p, a, img {
 }
 
 .landing-main .cta-button {
-  background-color: #ffc107;
-  color: #000;
+  background-color: var(--secondary-color);
+  color: var(--primary-color);
   padding: 0.75rem 1.5rem;
   border-radius: 5px;
   text-decoration: none;
@@ -78,10 +82,14 @@ body, html, div, h1, p, a, img {
   font-size: 1.2rem;
 }
 
+.landing-main .cta-button:hover {
+  background-color: var(--dark-secondary-color);
+}
+
 /* Footer */
 .landing-footer {
   text-align: center;
   padding: 1rem;
-  background-color: #f8f9fa;
+  background-color: var(--tertiary-color);
   font-size: 0.9rem;
 }

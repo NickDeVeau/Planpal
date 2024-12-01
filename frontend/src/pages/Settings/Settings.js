@@ -8,6 +8,7 @@ import "./settings.css";
 
 const Settings = () => {
   const [selectedSection, setSelectedSection] = useState("profile");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const auth = getAuth();
   const user = auth.currentUser;
   const navigate = useNavigate(); // Initialize useNavigate
@@ -23,19 +24,17 @@ const Settings = () => {
 
   const handleDeleteAccount = async () => {
     if (user) {
-      if (window.confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
-        try {
-          // Delete user data from Firestore
-          await deleteDoc(doc(db, "users", user.uid));
+      try {
+        // Delete user data from Firestore
+        await deleteDoc(doc(db, "users", user.uid));
 
-          // Delete user from Firebase Auth
-          await deleteUser(user);
+        // Delete user from Firebase Auth
+        await deleteUser(user);
 
-          // Navigate to Landing page after account deletion
-          navigate("/");
-        } catch (err) {
-          console.error("Error deleting account: ", err);
-        }
+        // Navigate to Landing page after account deletion
+        navigate("/");
+      } catch (err) {
+        console.error("Error deleting account: ", err);
       }
     }
   };
@@ -55,7 +54,7 @@ const Settings = () => {
             <h3>Account Settings</h3>
             {/* Add account settings options here */}
             <button onClick={handleSignOut}>Sign Out</button>
-            <button onClick={handleDeleteAccount} className="delete-button">Delete Account</button>
+            <button onClick={() => setShowDeleteModal(true)} className="delete-button">Delete Account</button>
           </div>
         );
       case "notifications":
@@ -102,6 +101,17 @@ const Settings = () => {
         </button>
       </aside>
       <main className="main-content">{renderSection()}</main>
+      {showDeleteModal && (
+        <div className="modal">
+          <div className="modal-content">
+            <span className="close-btn" onClick={() => setShowDeleteModal(false)}>&times;</span>
+            <h2>Confirm Account Deletion</h2>
+            <p>Are you sure you want to delete your account? This action cannot be undone.</p>
+            <button className="delete-btn" onClick={handleDeleteAccount}>Delete Account</button>
+            <button className="cancel-btn" onClick={() => setShowDeleteModal(false)}>Cancel</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

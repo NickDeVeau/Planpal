@@ -7,6 +7,7 @@ import { db, auth } from "../../firebase"; // Import Firestore and auth
 const EventCard = ({ event, projectId, fetchProjects }) => {
   const [showOptions, setShowOptions] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [editedEvent, setEditedEvent] = useState({ ...event });
   const optionsRef = useRef(null);
   const [expired, setExpired] = useState(false);
@@ -52,26 +53,25 @@ const EventCard = ({ event, projectId, fetchProjects }) => {
   };
 
   const handleDelete = async () => {
-    if (window.confirm("Are you sure you want to delete this event?")) {
-      const user = auth.currentUser;
-      if (user) {
-        const userDocRef = doc(db, "users", user.uid);
-        const userDoc = await getDoc(userDocRef);
-        if (userDoc.exists()) {
-          const userData = userDoc.data();
-          const updatedProjects = userData.projects.map((project) => {
-            if (project.id === projectId) {
-              const updatedEvents = project.events.filter((e) => e.id !== event.id);
-              return {
-                ...project,
-                events: updatedEvents
-              };
-            }
-            return project;
-          });
-          await updateDoc(userDocRef, { projects: updatedProjects });
-          fetchProjects(); // Refresh projects after deleting event
-        }
+    const user = auth.currentUser;
+    if (user) {
+      const userDocRef = doc(db, "users", user.uid);
+      const userDoc = await getDoc(userDocRef);
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        const updatedProjects = userData.projects.map((project) => {
+          if (project.id === projectId) {
+            const updatedEvents = project.events.filter((e) => e.id !== event.id);
+            return {
+              ...project,
+              events: updatedEvents
+            };
+          }
+          return project;
+        });
+        await updateDoc(userDocRef, { projects: updatedProjects });
+        fetchProjects(); // Refresh projects after deleting event
+        setShowDeleteModal(false); // Close the delete modal
       }
     }
   };
@@ -182,13 +182,24 @@ const EventCard = ({ event, projectId, fetchProjects }) => {
           {showOptions && (
             <div className="options-menu" ref={optionsRef}>
               <div className="option" onClick={handleEdit}>Edit</div>
-              <div className="option delete-option" onClick={handleDelete}>Delete</div>
+              <div className="option delete-option" onClick={() => setShowDeleteModal(true)}>Delete</div>
             </div>
           )}
         </div>
         <p className="event-description">{event.description}</p>
       </li>
       {isEditing && ReactDOM.createPortal(modal, document.body)}
+      {showDeleteModal && (
+        <div className="modal">
+          <div className="modal-content">
+            <span className="close-btn" onClick={() => setShowDeleteModal(false)}>&times;</span>
+            <h2>Confirm Event Deletion</h2>
+            <p>Are you sure you want to delete this event? This action cannot be undone.</p>
+            <button className="delete-btn" onClick={handleDelete}>Delete Event</button>
+            <button className="cancel-btn" onClick={() => setShowDeleteModal(false)}>Cancel</button>
+          </div>
+        </div>
+      )}
     </>
   );
 };

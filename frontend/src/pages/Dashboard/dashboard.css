@@ -517,3 +517,27 @@ body, html {
 /* ...existing code... */
 
 /* ...existing code... */
+
+.add-task-btn,
+.add-event-btn {
+  background: var(--button-bg-color);
+  color: var(--button-text-color);
+  border: none;
+  border-radius: 5px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.3s;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.add-task-btn:hover,
+.add-event-btn:hover {
+  background: var(--button-hover-bg-color);
+  transform: translateY(-2px);
+}
+
+.add-task-btn:active,
+.add-event-btn:active {
+  background: var(--button-active-bg-color);
+  transform: translateY(0);
+}

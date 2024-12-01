@@ -3,6 +3,8 @@ import "../../global.css"; // Import global CSS
 import "./dashboard.css";
 import TaskCard from "../../components/TaskCard/TaskCard";
 import EventCard from "../../components/EventCard/EventCard";
+import { db } from "../../firebase"; // Import Firestore
+import { collection, getDocs, addDoc, doc, updateDoc } from "firebase/firestore"; // Import Firestore functions
 
 const Dashboard = () => {
   const [projects, setProjects] = useState([]);
@@ -10,89 +12,88 @@ const Dashboard = () => {
   const [tasks, setTasks] = useState([]);
   const [events, setEvents] = useState([]);
 
-  // Fetch Projects Mock Data
+  // Fetch Projects from Firestore
   const fetchProjects = async () => {
-    const mockProjects = [
-      {
-        id: "1",
-        name: "Personal Tasks",
-        type: "personal",
-        categories: {
-          General: [
-            {
-              id: "t1",
-              title: "Buy groceries",
-              completed: false,
-              priority: "low",
-              description: "Get milk, bread, and eggs.",
-              dueDate: "2024-11-26",
-            },
-            {
-              id: "t2",
-              title: "Finish project report",
-              completed: true,
-              priority: "high",
-              description: "Complete the software engineering report.",
-              dueDate: "2024-11-27",
-            },
-          ],
-        },
-        events: [
-          {
-            id: "e1",
-            title: "Doctor's Appointment",
-            date: "2024-11-26",
-            priority: "medium",
-          },
-        ],
-      },
-      {
-        id: "2",
-        name: "Team Collaboration",
-        type: "shared",
-        categories: {
-          Frontend: [
-            {
-              id: "t3",
-              title: "Build Navbar",
-              completed: false,
-              priority: "medium",
-              description: "Develop the main site navigation.",
-              dueDate: "2024-11-28",
-            },
-          ],
-          Backend: [
-            {
-              id: "t4",
-              title: "Setup Database",
-              completed: false,
-              priority: "high",
-              description: "Configure Firestore for the app.",
-              dueDate: "2024-11-29",
-            },
-          ],
-        },
-        events: [
-          {
-            id: "e2",
-            title: "Team Meeting",
-            date: "2024-11-26",
-            priority: "high",
-          },
-        ],
-      },
-    ];
-
-    setProjects(mockProjects);
+    const projectsCollection = collection(db, "projects");
+    const projectsSnapshot = await getDocs(projectsCollection);
+    const projectsList = projectsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    setProjects(projectsList);
 
     // Aggregate all tasks and events for the overview tab
-    const allTasks = mockProjects.flatMap((project) =>
-      Object.values(project.categories).flat()
+    const allTasks = projectsList.flatMap((project) =>
+      project.categories ? Object.entries(project.categories).flatMap(([sectionName, tasks]) =>
+        tasks.map(task => ({ ...task, projectId: project.id, sectionName }))
+      ) : []
     );
-    const allEvents = mockProjects.flatMap((project) => project.events);
+    const allEvents = projectsList.flatMap((project) =>
+      project.events ? project.events.map(event => ({ ...event, projectId: project.id })) : []
+    );
 
     setTasks(allTasks);
     setEvents(allEvents);
+  };
+
+  const addTask = async (projectId, sectionName) => {
+    const taskTitle = prompt("Enter the task title:");
+    if (taskTitle) {
+      const newTask = {
+        title: taskTitle,
+        completed: false,
+        priority: "low",
+        description: "",
+        dueDate: ""
+      };
+      const projectDoc = doc(db, "projects", projectId);
+      const projectData = projects.find(project => project.id === projectId);
+      const updatedCategories = {
+        ...projectData.categories,
+        [sectionName]: [...projectData.categories[sectionName], newTask]
+      };
+      await updateDoc(projectDoc, { categories: updatedCategories });
+      fetchProjects(); // Refresh projects after adding a new task
+    }
+  };
+
+  const addEvent = async (projectId) => {
+    const eventTitle = prompt("Enter the event title:");
+    if (eventTitle) {
+      const newEvent = {
+        title: eventTitle,
+        date: "",
+        duration: "all-day",
+        priority: "low",
+        description: ""
+      };
+      const projectDoc = doc(db, "projects", projectId);
+      const projectData = projects.find(project => project.id === projectId);
+      const updatedEvents = [...projectData.events, newEvent];
+      await updateDoc(projectDoc, { events: updatedEvents });
+      fetchProjects(); // Refresh projects after adding a new event
+    }
+  };
+
+  const addProject = async () => {
+    const projectName = prompt("Enter the project name:");
+    if (projectName) {
+      await addDoc(collection(db, "projects"), {
+        name: projectName,
+        type: "personal",
+        categories: {},
+        events: []
+      });
+      fetchProjects(); // Refresh projects after adding a new project
+    }
+  };
+
+  const addSection = async (projectId) => {
+    const sectionName = prompt("Enter the section name:");
+    if (sectionName) {
+      const projectDoc = doc(db, "projects", projectId);
+      const projectData = projects.find(project => project.id === projectId);
+      const updatedCategories = { ...projectData.categories, [sectionName]: [] };
+      await updateDoc(projectDoc, { categories: updatedCategories });
+      fetchProjects(); // Refresh projects after adding a new section
+    }
   };
 
   useEffect(() => {
@@ -126,7 +127,7 @@ const Dashboard = () => {
               </li>
             ))}
           </ul>
-          <button className="add-project-btn">+ Add Project</button>
+          <button className="add-project-btn" onClick={addProject}>+ Add Project</button>
         </div>
         <button className="settings-btn" onClick={() => (window.location.href = "/settings")}>
           Settings
@@ -147,7 +148,7 @@ const Dashboard = () => {
                 </div>
                 <ul className="tasks-list">
                   {tasks.map((task) => (
-                    <TaskCard key={task.id} task={task} />
+                    <TaskCard key={task.id} task={task} projectId={task.projectId} sectionName={task.sectionName} fetchProjects={fetchProjects} />
                   ))}
                 </ul>
               </div>
@@ -157,7 +158,7 @@ const Dashboard = () => {
                 <h3>Events</h3>
                 <ul className="events-list">
                   {events.map((event) => (
-                    <EventCard key={event.id} event={event} />
+                    <EventCard key={event.id} event={event} projectId={event.projectId} fetchProjects={fetchProjects} />
                   ))}
                 </ul>
               </div>
@@ -171,16 +172,17 @@ const Dashboard = () => {
               <div className="panel">
                 <div className="tasks-header">
                   <h3>Tasks</h3>
-                  <button className="add-section-btn">+ Add Section</button>
+                  <button className="add-section-btn" onClick={() => addSection(selectedTab)}>+ Add Section</button>
                 </div>
                 {projects.find((project) => project.id === selectedTab)?.categories &&
                   Object.entries(projects.find((project) => project.id === selectedTab).categories).map(
                     ([category, tasks]) => (
                       <div key={category}>
                         <h4>{category}</h4>
+                        <button className="add-task-btn" onClick={() => addTask(selectedTab, category)}>+ Add Task</button>
                         <ul className="tasks-list">
                           {tasks.map((task) => (
-                            <TaskCard key={task.id} task={task} />
+                            <TaskCard key={task.id} task={task} projectId={selectedTab} sectionName={category} fetchProjects={fetchProjects} />
                           ))}
                         </ul>
                       </div>
@@ -191,9 +193,10 @@ const Dashboard = () => {
               {/* Project Events Panel */}
               <div className="panel">
                 <h3>Events</h3>
+                <button className="add-event-btn" onClick={() => addEvent(selectedTab)}>+ Add Event</button>
                 <ul className="events-list">
                   {projects.find((project) => project.id === selectedTab)?.events.map((event) => (
-                    <EventCard key={event.id} event={event} />
+                    <EventCard key={event.id} event={event} projectId={selectedTab} fetchProjects={fetchProjects} />
                   ))}
                 </ul>
               </div>

@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore"; // Import Firestore functions
+import { auth, db } from "../../firebase"; // Import Firestore
 import "../../global.css"; // Import global CSS
 import "./signin.css";
-import { auth } from "../../firebase"; // Import auth from firebase.js
 
 const Signin = () => {
   const [email, setEmail] = useState("");
@@ -13,7 +14,14 @@ const Signin = () => {
     e.preventDefault();
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        // Optionally, you can set user data to state or context here
+        console.log("User data:", userData);
+      }
       window.location.href = "/dashboard"; // Navigate to Dashboard after success
     } catch (err) {
       setError(err.message);

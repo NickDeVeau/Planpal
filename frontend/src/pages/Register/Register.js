@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore"; // Import Firestore functions
+import { db } from "../../firebase"; // Import Firestore
 import "./register.css";
 
 const Register = () => {
@@ -12,7 +14,13 @@ const Register = () => {
     const auth = getAuth();
 
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      await setDoc(doc(db, "users", user.uid), {
+        email: user.email,
+        tasks: [],
+        events: []
+      });
       alert("Registration successful!");
       window.location.href = "/signin"; // Navigate to Sign In after success
     } catch (err) {

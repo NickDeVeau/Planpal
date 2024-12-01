@@ -4,6 +4,7 @@ import "./taskCard.css";
 const TaskCard = ({ task }) => {
   const [showOptions, setShowOptions] = useState(false);
   const optionsRef = useRef(null);
+  const [completed, setCompleted] = useState(task.completed);
 
   const toggleOptions = () => {
     setShowOptions(!showOptions);
@@ -15,6 +16,11 @@ const TaskCard = ({ task }) => {
     }
   };
 
+  const handleCheckboxChange = () => {
+    setCompleted(!completed);
+    // Optionally, you can add code to update the state or make an API call here
+  };
+
   useEffect(() => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
@@ -23,10 +29,10 @@ const TaskCard = ({ task }) => {
   }, []);
 
   return (
-    <li className={`task-card priority-${task.priority}`}>
+    <li className={`task-card priority-${task.priority} ${completed ? 'completed' : ''}`}>
       <div className="task-header">
         <div className="completion-status">
-          <input type="checkbox" checked={task.completed} readOnly />
+          <input type="checkbox" checked={completed} onChange={handleCheckboxChange} />
         </div>
         <h4 className="task-title">
           {task.title}

@@ -185,3 +185,10 @@ body, html {
 .delete-option {
   color: red;
 }
+
+/* Completed State */
+.completed {
+  text-decoration: line-through;
+  color: grey;
+  opacity: 0.6;
+}

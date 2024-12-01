@@ -4,6 +4,7 @@ import "./eventCard.css";
 const EventCard = ({ event }) => {
   const [showOptions, setShowOptions] = useState(false);
   const optionsRef = useRef(null);
+  const [completed, setCompleted] = useState(event.completed);
 
   const toggleOptions = () => {
     setShowOptions(!showOptions);
@@ -15,6 +16,11 @@ const EventCard = ({ event }) => {
     }
   };
 
+  const handleCheckboxChange = () => {
+    setCompleted(!completed);
+    // Optionally, you can add code to update the state or make an API call here
+  };
+
   useEffect(() => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
@@ -23,7 +29,7 @@ const EventCard = ({ event }) => {
   }, []);
 
   return (
-    <li className={`event-card priority-${event.priority}`}>
+    <li className={`event-card priority-${event.priority} ${completed ? 'completed' : ''}`}>
       <div className="event-header">
         <h4 className="event-title">
           {event.title}
@@ -32,6 +38,7 @@ const EventCard = ({ event }) => {
           </span>
         </h4>
         <span className="event-date">{event.date}</span>
+        <input type="checkbox" checked={completed} onChange={handleCheckboxChange} />
         <button className="options-btn" onClick={toggleOptions}>⋮</button>
         {showOptions && (
           <div className="options-menu" ref={optionsRef}>

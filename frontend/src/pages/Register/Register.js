@@ -18,8 +18,9 @@ const Register = () => {
       const user = userCredential.user;
       await setDoc(doc(db, "users", user.uid), {
         email: user.email,
-        tasks: [],
-        events: []
+        projects: [], // Initialize projects array
+        tasks: [], // Initialize tasks array
+        events: [] // Initialize events array
       });
       alert("Registration successful!");
       window.location.href = "/signin"; // Navigate to Sign In after success

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import ReactDOM from "react-dom";
 import "./eventCard.css";
 import { doc, updateDoc, getDoc } from "firebase/firestore"; // Import Firestore functions
-import { db } from "../../firebase"; // Import Firestore
+import { db, auth } from "../../firebase"; // Import Firestore and auth
 
 const EventCard = ({ event, projectId, fetchProjects }) => {
   const [showOptions, setShowOptions] = useState(false);
@@ -26,29 +26,53 @@ const EventCard = ({ event, projectId, fetchProjects }) => {
   };
 
   const handleSave = async () => {
-    if (!projectId) {
-      console.error("Project ID is undefined");
-      return;
+    const user = auth.currentUser;
+    if (user) {
+      const userDocRef = doc(db, "users", user.uid);
+      const userDoc = await getDoc(userDocRef);
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        const updatedProjects = userData.projects.map((project) => {
+          if (project.id === projectId) {
+            const updatedEvents = project.events.map((e) =>
+              e.id === event.id ? { ...e, ...editedEvent } : e
+            );
+            return {
+              ...project,
+              events: updatedEvents
+            };
+          }
+          return project;
+        });
+        await updateDoc(userDocRef, { projects: updatedProjects });
+        setIsEditing(false);
+        fetchProjects(); // Refresh projects after editing event
+      }
     }
-    const projectDocRef = doc(db, "projects", projectId);
-    const projectSnapshot = await getDoc(projectDocRef);
-    const projectData = projectSnapshot.data();
-    const updatedEvents = projectData.events.map(e =>
-      e.title === event.title ? { ...e, ...editedEvent } : e
-    );
-    await updateDoc(projectDocRef, { events: updatedEvents });
-    setIsEditing(false);
-    fetchProjects(); // Refresh projects after editing event
   };
 
   const handleDelete = async () => {
     if (window.confirm("Are you sure you want to delete this event?")) {
-      const projectDocRef = doc(db, "projects", projectId);
-      const projectSnapshot = await getDoc(projectDocRef);
-      const projectData = projectSnapshot.data();
-      const updatedEvents = projectData.events.filter(e => e.title !== event.title);
-      await updateDoc(projectDocRef, { events: updatedEvents });
-      fetchProjects(); // Refresh projects after deleting event
+      const user = auth.currentUser;
+      if (user) {
+        const userDocRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          const updatedProjects = userData.projects.map((project) => {
+            if (project.id === projectId) {
+              const updatedEvents = project.events.filter((e) => e.id !== event.id);
+              return {
+                ...project,
+                events: updatedEvents
+              };
+            }
+            return project;
+          });
+          await updateDoc(userDocRef, { projects: updatedProjects });
+          fetchProjects(); // Refresh projects after deleting event
+        }
+      }
     }
   };
 

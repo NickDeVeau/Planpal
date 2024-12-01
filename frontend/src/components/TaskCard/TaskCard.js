@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import ReactDOM from "react-dom";
 import "./taskCard.css";
 import { doc, updateDoc, getDoc } from "firebase/firestore"; // Import Firestore functions
-import { db } from "../../firebase"; // Import Firestore
+import { db, auth } from "../../firebase"; // Import Firestore and auth
 
 const TaskCard = ({ task, projectId, sectionName, fetchProjects }) => {
   const [showOptions, setShowOptions] = useState(false);
@@ -23,15 +23,31 @@ const TaskCard = ({ task, projectId, sectionName, fetchProjects }) => {
 
   const handleCheckboxChange = async () => {
     setCompleted(!completed);
-    const projectDocRef = doc(db, "projects", projectId);
-    const projectSnapshot = await getDoc(projectDocRef);
-    const projectData = projectSnapshot.data();
-    const updatedTasks = projectData.categories[sectionName].map(t =>
-      t.title === task.title ? { ...t, completed: !completed } : t
-    );
-    const updatedCategories = { ...projectData.categories, [sectionName]: updatedTasks };
-    await updateDoc(projectDocRef, { categories: updatedCategories });
-    fetchProjects(); // Refresh projects after updating task completion status
+    const user = auth.currentUser;
+    if (user) {
+      const userDocRef = doc(db, "users", user.uid);
+      const userDoc = await getDoc(userDocRef);
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        const updatedProjects = userData.projects.map((project) => {
+          if (project.id === projectId) {
+            const updatedCategories = {
+              ...project.categories,
+              [sectionName]: project.categories[sectionName].map((t) =>
+                t.id === task.id ? { ...t, completed: !completed } : t
+              )
+            };
+            return {
+              ...project,
+              categories: updatedCategories
+            };
+          }
+          return project;
+        });
+        await updateDoc(userDocRef, { projects: updatedProjects });
+        fetchProjects(); // Refresh projects after updating task completion status
+      }
+    }
   };
 
   const handleEdit = () => {
@@ -39,27 +55,59 @@ const TaskCard = ({ task, projectId, sectionName, fetchProjects }) => {
   };
 
   const handleSave = async () => {
-    const projectDocRef = doc(db, "projects", projectId);
-    const projectSnapshot = await getDoc(projectDocRef);
-    const projectData = projectSnapshot.data();
-    const updatedTasks = projectData.categories[sectionName].map(t =>
-      t.title === task.title ? { ...t, ...editedTask } : t
-    );
-    const updatedCategories = { ...projectData.categories, [sectionName]: updatedTasks };
-    await updateDoc(projectDocRef, { categories: updatedCategories });
-    setIsEditing(false);
-    fetchProjects(); // Refresh projects after editing task
+    const user = auth.currentUser;
+    if (user) {
+      const userDocRef = doc(db, "users", user.uid);
+      const userDoc = await getDoc(userDocRef);
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        const updatedProjects = userData.projects.map((project) => {
+          if (project.id === projectId) {
+            const updatedCategories = {
+              ...project.categories,
+              [sectionName]: project.categories[sectionName].map((t) =>
+                t.id === task.id ? { ...t, ...editedTask } : t
+              )
+            };
+            return {
+              ...project,
+              categories: updatedCategories
+            };
+          }
+          return project;
+        });
+        await updateDoc(userDocRef, { projects: updatedProjects });
+        setIsEditing(false);
+        fetchProjects(); // Refresh projects after editing task
+      }
+    }
   };
 
   const handleDelete = async () => {
     if (window.confirm("Are you sure you want to delete this task?")) {
-      const projectDocRef = doc(db, "projects", projectId);
-      const projectSnapshot = await getDoc(projectDocRef);
-      const projectData = projectSnapshot.data();
-      const updatedTasks = projectData.categories[sectionName].filter(t => t.title !== task.title);
-      const updatedCategories = { ...projectData.categories, [sectionName]: updatedTasks };
-      await updateDoc(projectDocRef, { categories: updatedCategories });
-      fetchProjects(); // Refresh projects after deleting task
+      const user = auth.currentUser;
+      if (user) {
+        const userDocRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          const updatedProjects = userData.projects.map((project) => {
+            if (project.id === projectId) {
+              const updatedCategories = {
+                ...project.categories,
+                [sectionName]: project.categories[sectionName].filter((t) => t.id !== task.id)
+              };
+              return {
+                ...project,
+                categories: updatedCategories
+              };
+            }
+            return project;
+          });
+          await updateDoc(userDocRef, { projects: updatedProjects });
+          fetchProjects(); // Refresh projects after deleting task
+        }
+      }
     }
   };
 

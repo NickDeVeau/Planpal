@@ -568,6 +568,7 @@ body, html {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   position: relative;
   margin: auto;
+  text-align: center;
 }
 
 .close-btn {
@@ -588,8 +589,7 @@ body, html {
   margin-top: 0;
 }
 
-.modal-content select,
-.modal-content .apply-btn {
+.modal-content input {
   width: 100%;
   padding: 0.5rem;
   margin: 0.5rem 0;
@@ -614,6 +614,20 @@ body, html {
   background-color: #1e7e34;
 }
 
+.modal-content .cancel-btn {
+  background-color: #6c757d;
+  color: white;
+  margin-left: 1rem;
+}
+
+.modal-content .cancel-btn:hover {
+  background-color: #5a6268;
+}
+
+.modal-content .cancel-btn:active {
+  background-color: #545b62;
+}
+
 /* ...existing code... */
 
 .sort-select {
@@ -629,4 +643,28 @@ body, html {
 
 .sort-select:hover {
   background-color: #f1f3f5;
+}
+
+.modal-content input {
+  width: 100%;
+  padding: 0.5rem;
+  margin: 0.5rem 0;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+.modal-content .cancel-btn {
+  background-color: #6c757d;
+  color: white;
+  margin-left: 1rem;
+}
+
+.modal-content .cancel-btn:hover {
+  background-color: #5a6268;
+}
+
+.modal-content .cancel-btn:active {
+  background-color: #545b62;
 }

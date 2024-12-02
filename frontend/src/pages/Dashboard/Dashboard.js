@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "../../global.css"; // Import global CSS
 import "./dashboard.css";
 import TaskCard from "../../components/TaskCard/TaskCard";
@@ -13,6 +13,33 @@ const Dashboard = () => {
   const [tasks, setTasks] = useState([]);
   const [events, setEvents] = useState([]);
   const [sortOption, setSortOption] = useState("");
+  const [showProjectModal, setShowProjectModal] = useState(false);
+  const [newProjectName, setNewProjectName] = useState("");
+  const [showSectionModal, setShowSectionModal] = useState(false);
+  const [newSectionName, setNewSectionName] = useState("");
+  const [showTaskModal, setShowTaskModal] = useState(false);
+  const [newTaskTitle, setNewTaskTitle] = useState("");
+  const [selectedSection, setSelectedSection] = useState("");
+  const [showEventModal, setShowEventModal] = useState(false);
+  const [newEventTitle, setNewEventTitle] = useState("");
+
+  const projectInputRef = useRef(null);
+  const sectionInputRef = useRef(null);
+  const taskInputRef = useRef(null);
+  const eventInputRef = useRef(null);
+
+  useEffect(() => {
+    if (showProjectModal) projectInputRef.current.focus();
+    if (showSectionModal) sectionInputRef.current.focus();
+    if (showTaskModal) taskInputRef.current.focus();
+    if (showEventModal) eventInputRef.current.focus();
+  }, [showProjectModal, showSectionModal, showTaskModal, showEventModal]);
+
+  const handleKeyPress = (e, action) => {
+    if (e.key === "Enter") {
+      action();
+    }
+  };
 
   // Fetch Projects from Firestore
   const fetchProjects = async (userId) => {
@@ -39,8 +66,7 @@ const Dashboard = () => {
   }, []);
 
   const addProject = async () => {
-    const projectName = prompt("Enter the project name:");
-    if (projectName) {
+    if (newProjectName) {
       const user = auth.currentUser;
       if (user) {
         const userDocRef = doc(db, "users", user.uid);
@@ -49,7 +75,7 @@ const Dashboard = () => {
           const userData = userDoc.data();
           const newProject = {
             id: new Date().getTime().toString(), // Generate a unique ID for the project
-            name: projectName,
+            name: newProjectName,
             type: "personal",
             categories: {},
             events: []
@@ -57,14 +83,15 @@ const Dashboard = () => {
           const updatedProjects = [...(userData.projects || []), newProject];
           await updateDoc(userDocRef, { projects: updatedProjects });
           fetchProjects(user.uid); // Refresh projects after adding a new project
+          setShowProjectModal(false);
+          setNewProjectName("");
         }
       }
     }
   };
 
   const addTask = async (projectId, sectionName) => {
-    const taskTitle = prompt("Enter the task title:");
-    if (taskTitle) {
+    if (newTaskTitle) {
       const user = auth.currentUser;
       if (user) {
         const userDocRef = doc(db, "users", user.uid);
@@ -79,7 +106,7 @@ const Dashboard = () => {
                   ...(project.categories[sectionName] || []),
                   {
                     id: new Date().getTime().toString(),
-                    title: taskTitle,
+                    title: newTaskTitle,
                     completed: false,
                     priority: "low",
                     description: "",
@@ -96,14 +123,15 @@ const Dashboard = () => {
           });
           await updateDoc(userDocRef, { projects: updatedProjects });
           fetchProjects(user.uid); // Refresh projects after adding a new task
+          setShowTaskModal(false);
+          setNewTaskTitle("");
         }
       }
     }
   };
 
   const addEvent = async (projectId) => {
-    const eventTitle = prompt("Enter the event title:");
-    if (eventTitle) {
+    if (newEventTitle) {
       const user = auth.currentUser;
       if (user) {
         const userDocRef = doc(db, "users", user.uid);
@@ -116,7 +144,7 @@ const Dashboard = () => {
                 ...project.events,
                 {
                   id: new Date().getTime().toString(),
-                  title: eventTitle,
+                  title: newEventTitle,
                   date: "",
                   duration: "all-day",
                   priority: "low",
@@ -132,14 +160,15 @@ const Dashboard = () => {
           });
           await updateDoc(userDocRef, { projects: updatedProjects });
           fetchProjects(user.uid); // Refresh projects after adding a new event
+          setShowEventModal(false);
+          setNewEventTitle("");
         }
       }
     }
   };
 
   const addSection = async (projectId) => {
-    const sectionName = prompt("Enter the section name:");
-    if (sectionName) {
+    if (newSectionName) {
       const user = auth.currentUser;
       if (user) {
         const userDocRef = doc(db, "users", user.uid);
@@ -152,7 +181,7 @@ const Dashboard = () => {
                 ...project,
                 categories: {
                   ...project.categories,
-                  [sectionName]: []
+                  [newSectionName]: []
                 }
               };
             }
@@ -160,6 +189,8 @@ const Dashboard = () => {
           });
           await updateDoc(userDocRef, { projects: updatedProjects });
           fetchProjects(user.uid); // Refresh projects after adding a new section
+          setShowSectionModal(false);
+          setNewSectionName("");
         }
       }
     }
@@ -217,7 +248,7 @@ const Dashboard = () => {
               </li>
             ))}
           </ul>
-          <button className="add-project-btn" onClick={addProject}>+ Add Project</button>
+          <button className="add-project-btn" onClick={() => setShowProjectModal(true)}>+ Add Project</button>
         </div>
         <button className="settings-btn" onClick={() => (window.location.href = "/settings")}>
           Settings
@@ -273,7 +304,7 @@ const Dashboard = () => {
               <div className="panel">
                 <div className="tasks-header">
                   <h3>Tasks</h3>
-                  <button className="add-section-btn" onClick={() => addSection(selectedTab)}>+ Add Section</button>
+                  <button className="add-section-btn" onClick={() => setShowSectionModal(true)}>+ Add Section</button>
                   <select className="sort-select" value={sortOption} onChange={handleSortChange}>
                     <option value="">Sort By</option>
                     <option value="priority">Priority</option>
@@ -286,7 +317,7 @@ const Dashboard = () => {
                     ([category, tasks]) => (
                       <div key={category}>
                         <h4>{category}</h4>
-                        <button className="add-task-btn" onClick={() => addTask(selectedTab, category)}>+ Add Task</button>
+                        <button className="add-task-btn" onClick={() => { setSelectedSection(category); setShowTaskModal(true); }}>+ Add Task</button>
                         <ul className="tasks-list">
                           {tasks.map((task) => (
                             <TaskCard key={task.id} task={task} projectId={selectedTab} sectionName={category} fetchProjects={fetchProjects} />
@@ -300,7 +331,7 @@ const Dashboard = () => {
               {/* Project Events Panel */}
               <div className="panel">
                 <h3>Events</h3>
-                <button className="add-event-btn" onClick={() => addEvent(selectedTab)}>+ Add Event</button>
+                <button className="add-event-btn" onClick={() => setShowEventModal(true)}>+ Add Event</button>
                 <select className="sort-select" value={sortOption} onChange={handleSortChange}>
                   <option value="">Sort By</option>
                   <option value="priority">Priority</option>
@@ -315,6 +346,78 @@ const Dashboard = () => {
               </div>
             </div>
           </>
+        )}
+        {showProjectModal && (
+          <div className="modal">
+            <div className="modal-content">
+              <span className="close-btn" onClick={() => setShowProjectModal(false)}>&times;</span>
+              <h2>Add New Project</h2>
+              <input
+                type="text"
+                placeholder="Project Name"
+                value={newProjectName}
+                onChange={(e) => setNewProjectName(e.target.value)}
+                ref={projectInputRef}
+                onKeyPress={(e) => handleKeyPress(e, addProject)}
+              />
+              <button className="apply-btn" onClick={addProject}>Add Project</button>
+              <button className="cancel-btn" onClick={() => setShowProjectModal(false)}>Cancel</button>
+            </div>
+          </div>
+        )}
+        {showSectionModal && (
+          <div className="modal">
+            <div className="modal-content">
+              <span className="close-btn" onClick={() => setShowSectionModal(false)}>&times;</span>
+              <h2>Add New Section</h2>
+              <input
+                type="text"
+                placeholder="Section Name"
+                value={newSectionName}
+                onChange={(e) => setNewSectionName(e.target.value)}
+                ref={sectionInputRef}
+                onKeyPress={(e) => handleKeyPress(e, () => addSection(selectedTab))}
+              />
+              <button className="apply-btn" onClick={() => addSection(selectedTab)}>Add Section</button>
+              <button className="cancel-btn" onClick={() => setShowSectionModal(false)}>Cancel</button>
+            </div>
+          </div>
+        )}
+        {showTaskModal && (
+          <div className="modal">
+            <div className="modal-content">
+              <span className="close-btn" onClick={() => setShowTaskModal(false)}>&times;</span>
+              <h2>Add New Task</h2>
+              <input
+                type="text"
+                placeholder="Task Title"
+                value={newTaskTitle}
+                onChange={(e) => setNewTaskTitle(e.target.value)}
+                ref={taskInputRef}
+                onKeyPress={(e) => handleKeyPress(e, () => addTask(selectedTab, selectedSection))}
+              />
+              <button className="apply-btn" onClick={() => addTask(selectedTab, selectedSection)}>Add Task</button>
+              <button className="cancel-btn" onClick={() => setShowTaskModal(false)}>Cancel</button>
+            </div>
+          </div>
+        )}
+        {showEventModal && (
+          <div className="modal">
+            <div className="modal-content">
+              <span className="close-btn" onClick={() => setShowEventModal(false)}>&times;</span>
+              <h2>Add New Event</h2>
+              <input
+                type="text"
+                placeholder="Event Title"
+                value={newEventTitle}
+                onChange={(e) => setNewEventTitle(e.target.value)}
+                ref={eventInputRef}
+                onKeyPress={(e) => handleKeyPress(e, () => addEvent(selectedTab))}
+              />
+              <button className="apply-btn" onClick={() => addEvent(selectedTab)}>Add Event</button>
+              <button className="cancel-btn" onClick={() => setShowEventModal(false)}>Cancel</button>
+            </div>
+          </div>
         )}
       </main>
     </div>

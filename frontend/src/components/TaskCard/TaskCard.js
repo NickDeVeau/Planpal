@@ -84,29 +84,27 @@ const TaskCard = ({ task, projectId, sectionName, fetchProjects }) => {
   };
 
   const handleDelete = async () => {
-    if (window.confirm("Are you sure you want to delete this task?")) {
-      const user = auth.currentUser;
-      if (user) {
-        const userDocRef = doc(db, "users", user.uid);
-        const userDoc = await getDoc(userDocRef);
-        if (userDoc.exists()) {
-          const userData = userDoc.data();
-          const updatedProjects = userData.projects.map((project) => {
-            if (project.id === projectId) {
-              const updatedCategories = {
-                ...project.categories,
-                [sectionName]: project.categories[sectionName].filter((t) => t.id !== task.id)
-              };
-              return {
-                ...project,
-                categories: updatedCategories
-              };
-            }
-            return project;
-          });
-          await updateDoc(userDocRef, { projects: updatedProjects });
-          fetchProjects(); // Refresh projects after deleting task
-        }
+    const user = auth.currentUser;
+    if (user) {
+      const userDocRef = doc(db, "users", user.uid);
+      const userDoc = await getDoc(userDocRef);
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        const updatedProjects = userData.projects.map((project) => {
+          if (project.id === projectId) {
+            const updatedCategories = {
+              ...project.categories,
+              [sectionName]: project.categories[sectionName].filter((t) => t.id !== task.id)
+            };
+            return {
+              ...project,
+              categories: updatedCategories
+            };
+          }
+          return project;
+        });
+        await updateDoc(userDocRef, { projects: updatedProjects });
+        fetchProjects(user.uid); // Refresh projects after deleting task
       }
     }
   };

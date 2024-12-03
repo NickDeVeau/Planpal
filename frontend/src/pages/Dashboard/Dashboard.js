@@ -46,9 +46,33 @@ const Dashboard = () => {
     const userDoc = await getDoc(doc(db, "users", userId));
     if (userDoc.exists()) {
       const userData = userDoc.data();
-      setProjects(userData.projects || []);
-      setTasks(userData.tasks || []);
-      setEvents(userData.events || []);
+      const projects = userData.projects || [];
+      setProjects(projects);
+
+      // Extract all tasks from all projects' categories
+      const allTasks = [];
+      const allEvents = [];
+
+      projects.forEach((project) => {
+        // Extract tasks from categories
+        if (project.categories) {
+          Object.entries(project.categories).forEach(([sectionName, tasks]) => {
+            tasks.forEach((task) => {
+              allTasks.push({ ...task, projectId: project.id, sectionName });
+            });
+          });
+        }
+
+        // Extract events
+        if (project.events) {
+          project.events.forEach((event) => {
+            allEvents.push({ ...event, projectId: project.id });
+          });
+        }
+      });
+
+      setTasks(allTasks);
+      setEvents(allEvents);
     }
   };
 
@@ -221,6 +245,15 @@ const Dashboard = () => {
     setEvents(sortedEvents);
   };
 
+  const filterTasksAndEventsForToday = () => {
+    const today = new Date().toISOString().split('T')[0]; // Get current date in YYYY-MM-DD format
+  
+    const tasksForToday = tasks.filter(task => task.dueDate === today);
+    const eventsForToday = events.filter(event => event.date === today);
+  
+    return { tasksForToday, eventsForToday };
+  };
+
   return (
     <div className="dashboard-container">
       {/* Sidebar */}
@@ -273,7 +306,7 @@ const Dashboard = () => {
                   </select>
                 </div>
                 <ul className="tasks-list">
-                  {tasks.map((task) => (
+                  {filterTasksAndEventsForToday().tasksForToday.map((task) => (
                     <TaskCard key={task.id} task={task} projectId={task.projectId} sectionName={task.sectionName} fetchProjects={fetchProjects} />
                   ))}
                 </ul>
@@ -289,7 +322,7 @@ const Dashboard = () => {
                   <option value="name">Name</option>
                 </select>
                 <ul className="events-list">
-                  {events.map((event) => (
+                  {filterTasksAndEventsForToday().eventsForToday.map((event) => (
                     <EventCard key={event.id} event={event} projectId={event.projectId} fetchProjects={fetchProjects} />
                   ))}
                 </ul>

@@ -65,9 +65,9 @@ const TaskCard = ({ task, projectId, sectionName, fetchProjects }) => {
           if (project.id === projectId) {
             const updatedCategories = {
               ...project.categories,
-              [sectionName]: project.categories[sectionName].map((t) =>
+              [sectionName]: project.categories[sectionName]?.map((t) =>
                 t.id === task.id ? { ...t, ...editedTask } : t
-              )
+              ) || []
             };
             return {
               ...project,
@@ -78,7 +78,7 @@ const TaskCard = ({ task, projectId, sectionName, fetchProjects }) => {
         });
         await updateDoc(userDocRef, { projects: updatedProjects });
         setIsEditing(false);
-        fetchProjects(); // Refresh projects after editing task
+        fetchProjects(user.uid); // Ensure user ID is passed to fetchProjects
       }
     }
   };

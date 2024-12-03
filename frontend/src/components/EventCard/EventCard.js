@@ -35,9 +35,9 @@ const EventCard = ({ event, projectId, fetchProjects }) => {
         const userData = userDoc.data();
         const updatedProjects = userData.projects.map((project) => {
           if (project.id === projectId) {
-            const updatedEvents = project.events.map((e) =>
+            const updatedEvents = project.events?.map((e) =>
               e.id === event.id ? { ...e, ...editedEvent } : e
-            );
+            ) || [];
             return {
               ...project,
               events: updatedEvents
@@ -47,7 +47,7 @@ const EventCard = ({ event, projectId, fetchProjects }) => {
         });
         await updateDoc(userDocRef, { projects: updatedProjects });
         setIsEditing(false);
-        fetchProjects(); // Refresh projects after editing event
+        fetchProjects(user.uid); // Ensure user ID is passed to fetchProjects
       }
     }
   };

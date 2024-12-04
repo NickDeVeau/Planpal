@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-import { doc, getDoc, setDoc } from "firebase/firestore"; // Import Firestore functions
+import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore"; // Import Firestore functions
 import { auth, db } from "../../firebase"; // Import Firestore
 import "../../global.css"; // Import global CSS
 import "./signin.css";
@@ -19,8 +19,18 @@ const Signin = () => {
       const userDoc = await getDoc(doc(db, "users", user.uid));
       if (userDoc.exists()) {
         const userData = userDoc.data();
-        // Optionally, you can set user data to state or context here
+        if (!userData.profilePicture) {
+          await updateDoc(doc(db, "users", user.uid), { profilePicture: null });
+        }
         console.log("User data:", userData);
+      } else {
+        await setDoc(doc(db, "users", user.uid), {
+          email: user.email,
+          projects: [],
+          profilePicture: null, // Initialize profilePicture field
+          tasks: [], // Initialize tasks array
+          events: [] // Initialize events array
+        });
       }
       window.location.href = "/dashboard"; // Navigate to Dashboard after success
     } catch (err) {

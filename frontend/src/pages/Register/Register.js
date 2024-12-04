@@ -21,7 +21,8 @@ const Register = () => {
         email: user.email,
         projects: [], // Initialize projects array
         tasks: [], // Initialize tasks array
-        events: [] // Initialize events array
+        events: [], // Initialize events array
+        profilePicture: null // Initialize profilePicture field
       });
       setShowSuccessModal(true); // Show success modal
     } catch (err) {

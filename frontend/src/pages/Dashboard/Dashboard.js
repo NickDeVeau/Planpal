@@ -6,6 +6,7 @@ import EventCard from "../../components/EventCard/EventCard";
 import { db, auth } from "../../firebase"; // Import Firestore and Auth
 import { collection, getDocs, addDoc, doc, updateDoc, getDoc } from "firebase/firestore"; // Import Firestore functions
 import { onAuthStateChanged } from "firebase/auth"; // Import onAuthStateChanged
+import { getAuth } from "firebase/auth";
 
 const Dashboard = () => {
   const [projects, setProjects] = useState([]);
@@ -22,6 +23,10 @@ const Dashboard = () => {
   const [selectedSection, setSelectedSection] = useState("");
   const [showEventModal, setShowEventModal] = useState(false);
   const [newEventTitle, setNewEventTitle] = useState("");
+  const [profilePicture, setProfilePicture] = useState(null);
+  const auth = getAuth();
+  const user = auth.currentUser;
+  const username = user ? user.email.split('@')[0] : '';
 
   const projectInputRef = useRef(null);
   const sectionInputRef = useRef(null);
@@ -254,13 +259,27 @@ const Dashboard = () => {
     return { tasksForToday, eventsForToday };
   };
 
+  useEffect(() => {
+    const fetchProfilePicture = async () => {
+      if (user) {
+        const userDocRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          setProfilePicture(userData.profilePicture || null);
+        }
+      }
+    };
+    fetchProfilePicture();
+  }, [user]);
+
   return (
     <div className="dashboard-container">
       {/* Sidebar */}
       <aside className="sidebar">
         <div className="user-info">
-          <img src="/path/to/avatar.jpg" alt="User Avatar" />
-          <span className="username">Username</span>
+          <img src={profilePicture || "/path/to/default-avatar.jpg"} alt="User Avatar" />
+          <span className="username">{username}</span>
         </div>
         <div>
           <h2>Projects</h2>
@@ -394,7 +413,7 @@ const Dashboard = () => {
                 onKeyPress={(e) => handleKeyPress(e, addProject)}
               />
               <button className="apply-btn" onClick={addProject}>Add Project</button>
-              <button className="cancel-btn" onClick={() => setShowProjectModal(false)}>Cancel</button>
+              <button class="cancel-btn" onClick={() => setShowProjectModal(false)}>Cancel</button>
             </div>
           </div>
         )}

@@ -70,7 +70,7 @@ const EventCard = ({ event, projectId, fetchProjects }) => {
           return project;
         });
         await updateDoc(userDocRef, { projects: updatedProjects });
-        fetchProjects(); // Refresh projects after deleting event
+        fetchProjects(user.uid); // Ensure user ID is passed to fetchProjects
         setShowDeleteModal(false); // Close the delete modal
       }
     }

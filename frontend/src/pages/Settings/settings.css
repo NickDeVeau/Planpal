@@ -102,6 +102,26 @@
   font-size: 1.5rem;
 }
 
+/* Profile Picture Section */
+.profile-picture-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.profile-picture {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 1rem;
+}
+
+.profile-picture-section input[type="file"] {
+  display: block;
+}
+
 /* Modal Styles */
 .modal {
   display: flex;

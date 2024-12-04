@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { getAuth, signOut, deleteUser } from "firebase/auth";
-import { doc, deleteDoc, collection, getDocs, writeBatch } from "firebase/firestore";
+import { doc, deleteDoc, updateDoc, getDoc } from "firebase/firestore"; // Import updateDoc and getDoc
 import { db } from "../../firebase"; // Import db from firebase.js
 import { useNavigate } from "react-router-dom"; // Import useNavigate from react-router-dom
 import "../../global.css"; // Import global CSS
@@ -9,9 +9,26 @@ import "./settings.css";
 const Settings = () => {
   const [selectedSection, setSelectedSection] = useState("profile");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [profilePicture, setProfilePicture] = useState(null); // State for profile picture
+  const [username, setUsername] = useState(''); // Add username state
   const auth = getAuth();
   const user = auth.currentUser;
   const navigate = useNavigate(); // Initialize useNavigate
+
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      if (user) {
+        const userDocRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          setProfilePicture(userData.profilePicture || null);
+          setUsername(user.email.split('@')[0]); // Extract username from email
+        }
+      }
+    };
+    fetchProfileData();
+  }, [user]);
 
   const handleSignOut = async () => {
     try {
@@ -39,20 +56,37 @@ const Settings = () => {
     }
   };
 
+  const handleProfilePictureChange = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        setProfilePicture(reader.result);
+        if (user) {
+          const userDocRef = doc(db, "users", user.uid);
+          await updateDoc(userDocRef, { profilePicture: reader.result });
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const renderSection = () => {
     switch (selectedSection) {
       case "profile":
         return (
           <div className="settings-content">
             <h3>Profile Settings</h3>
-            {/* Add profile settings options here */}
+            <div className="profile-picture-section">
+              <img src={profilePicture || "/path/to/default-avatar.jpg"} alt="Profile" className="profile-picture" />
+              <input type="file" accept="image/*" onChange={handleProfilePictureChange} />
+            </div>
           </div>
         );
       case "account":
         return (
           <div className="settings-content">
             <h3>Account Settings</h3>
-            {/* Add account settings options here */}
             <button onClick={handleSignOut}>Sign Out</button>
             <button onClick={() => setShowDeleteModal(true)} className="delete-button">Delete Account</button>
           </div>
@@ -73,8 +107,8 @@ const Settings = () => {
     <div className="settings-container">
       <aside className="sidebar">
         <div className="user-info">
-          <img src="/path/to/avatar.jpg" alt="User Avatar" />
-          <span className="username">Username</span>
+          <img src={profilePicture || "/path/to/default-avatar.jpg"} alt="User Avatar" />
+          <span className="username">{username}</span>
         </div>
         <ul>
           <li

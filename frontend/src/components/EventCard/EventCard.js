@@ -96,7 +96,6 @@ const EventCard = ({ event, projectId, fetchProjects }) => {
         }
       } else if (event.duration === "specific-time") {
         if (event.startTime && event.endTime) {
-          const startDateTime = new Date(`${event.date}T${event.startTime}`);
           const endDateTime = new Date(`${event.date}T${event.endTime}`);
           if (now > endDateTime) {
             setExpired(true);

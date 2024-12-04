@@ -3,8 +3,8 @@ import "../../global.css"; // Import global CSS
 import "./dashboard.css";
 import TaskCard from "../../components/TaskCard/TaskCard";
 import EventCard from "../../components/EventCard/EventCard";
-import { db, auth } from "../../firebase"; // Import Firestore and Auth
-import { collection, getDocs, addDoc, doc, updateDoc, getDoc } from "firebase/firestore"; // Import Firestore functions
+import { db } from "../../firebase"; // Import Firestore
+import { doc, updateDoc, getDoc } from "firebase/firestore"; // Import Firestore functions
 import { onAuthStateChanged } from "firebase/auth"; // Import onAuthStateChanged
 import { getAuth } from "firebase/auth";
 

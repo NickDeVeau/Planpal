@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore"; // Import Firestore functions
 import { auth, db } from "../../firebase"; // Import Firestore
 import "../../global.css"; // Import global CSS

@@ -1,20 +1,29 @@
 import React, { useState, useEffect } from "react";
-import { getAuth, signOut, deleteUser } from "firebase/auth";
-import { doc, deleteDoc, updateDoc, getDoc } from "firebase/firestore"; // Import updateDoc and getDoc
-import { db } from "../../firebase"; // Import db from firebase.js
-import { useNavigate } from "react-router-dom"; // Import useNavigate from react-router-dom
-import "../../global.css"; // Import global CSS
+import { getAuth, signOut, deleteUser, onAuthStateChanged } from "firebase/auth";
+import { doc, deleteDoc, updateDoc, getDoc } from "firebase/firestore";
+import { db } from "../../firebase";
+import { useNavigate } from "react-router-dom";
+import "../../global.css";
 import "./settings.css";
 
 const Settings = () => {
   const [selectedSection, setSelectedSection] = useState("profile");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [profilePicture, setProfilePicture] = useState(null); // State for profile picture
-  const [username, setUsername] = useState(''); // Add username state
+  const [profilePicture, setProfilePicture] = useState(null);
+  const [username, setUsername] = useState('');
+  const [user, setUser] = useState(null); // Add state for user
   const auth = getAuth();
-  const user = auth.currentUser;
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate();
 
+  // Listen for authentication state changes
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      setUser(firebaseUser);
+    });
+    return () => unsubscribe();
+  }, [auth]);
+
+  // Fetch profile data when user is available
   useEffect(() => {
     const fetchProfileData = async () => {
       if (user) {
@@ -23,7 +32,7 @@ const Settings = () => {
         if (userDoc.exists()) {
           const userData = userDoc.data();
           setProfilePicture(userData.profilePicture || null);
-          setUsername(user.email.split('@')[0]); // Extract username from email
+          setUsername(user.email.split('@')[0]);
         }
       }
     };

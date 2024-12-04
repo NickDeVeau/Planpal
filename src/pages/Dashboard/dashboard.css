@@ -738,3 +738,16 @@ body, html {
 }
 
 /* ...existing code... */
+
+.contributors-list {
+  display: inline-block;
+  margin-left: 1rem;
+}
+
+.contributor-email {
+  background-color: #f1f1f1;
+  border-radius: 5px;
+  padding: 0.2rem 0.5rem;
+  margin-right: 0.5rem;
+  font-size: 0.9rem;
+}

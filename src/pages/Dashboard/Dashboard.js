@@ -4,7 +4,7 @@ import "./dashboard.css";
 import TaskCard from "../../components/TaskCard/TaskCard";
 import EventCard from "../../components/EventCard/EventCard";
 import { db } from "../../firebase"; // Import Firestore
-import { doc, updateDoc, getDoc } from "firebase/firestore"; // Import Firestore functions
+import { doc, updateDoc, getDoc, query, where, collection, getDocs } from "firebase/firestore"; // Import Firestore functions
 import { onAuthStateChanged } from "firebase/auth"; // Import onAuthStateChanged
 import { getAuth } from "firebase/auth";
 
@@ -31,6 +31,7 @@ const Dashboard = () => {
   const [projectOptionsPosition, setProjectOptionsPosition] = useState({ x: 0, y: 0 });
   const [selectedProjectId, setSelectedProjectId] = useState(null);
   const [showDeleteProjectModal, setShowDeleteProjectModal] = useState(false);
+  const [contributorEmails, setContributorEmails] = useState([]);
   const auth = getAuth();
   const user = auth.currentUser;
   const username = user ? user.email.split('@')[0] : '';
@@ -239,23 +240,30 @@ const Dashboard = () => {
     if (contributorEmail) {
       const user = auth.currentUser;
       if (user) {
-        const userDocRef = doc(db, "users", user.uid);
-        const userDoc = await getDoc(userDocRef);
-        if (userDoc.exists()) {
-          const userData = userDoc.data();
-          const updatedProjects = userData.projects.map((project) => {
-            if (project.id === projectId) {
-              return {
-                ...project,
-                contributors: [...project.contributors, contributorEmail]
-              };
-            }
-            return project;
-          });
-          await updateDoc(userDocRef, { projects: updatedProjects });
-          fetchProjects(user.uid); // Refresh projects after adding a contributor
-          setShowAddContributorModal(false);
-          setContributorEmail("");
+        const q = query(collection(db, "users"), where("email", "==", contributorEmail));
+        const querySnapshot = await getDocs(q);
+        if (!querySnapshot.empty) {
+          const contributorDoc = querySnapshot.docs[0];
+          const userDocRef = doc(db, "users", user.uid);
+          const userDoc = await getDoc(userDocRef);
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            const updatedProjects = userData.projects.map((project) => {
+              if (project.id === projectId) {
+                return {
+                  ...project,
+                  contributors: [...project.contributors, contributorDoc.id]
+                };
+              }
+              return project;
+            });
+            await updateDoc(userDocRef, { projects: updatedProjects });
+            fetchProjects(user.uid); // Refresh projects after adding a contributor
+            setShowAddContributorModal(false);
+            setContributorEmail("");
+          }
+        } else {
+          alert("Contributor email does not exist.");
         }
       }
     }
@@ -320,6 +328,32 @@ const Dashboard = () => {
       }
     }
   };
+
+  useEffect(() => {
+    const fetchContributorEmails = async (contributorIds) => {
+      const emails = [];
+      for (const id of contributorIds) {
+        const contributorDoc = await getDoc(doc(db, "users", id));
+        if (contributorDoc.exists()) {
+          const contributorData = contributorDoc.data();
+          emails.push(contributorData.email);
+        }
+      }
+      return emails;
+    };
+  
+    const loadContributorEmails = async () => {
+      const project = projects.find((project) => project.id === selectedTab);
+      if (project) {
+        const emails = await fetchContributorEmails(project.contributors);
+        setContributorEmails(emails);
+      }
+    };
+  
+    if (selectedTab !== "overview") {
+      loadContributorEmails();
+    }
+  }, [selectedTab, projects]);
 
   useEffect(() => {
     const fetchProfilePicture = async () => {
@@ -416,6 +450,13 @@ const Dashboard = () => {
             <h2>
               {projects.find((project) => project.id === selectedTab)?.name}
               <button className="add-contributor-btn" onClick={() => setShowAddContributorModal(true)}>+</button>
+              <div className="contributors-list">
+                {contributorEmails.map((email) => (
+                  <span key={email} className="contributor-email">
+                    {email.split('@')[0]}
+                  </span>
+                ))}
+              </div>
             </h2>
             <div className="panel-container">
               {/* Project Tasks Panel */}

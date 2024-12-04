@@ -677,4 +677,64 @@ body, html {
   margin-right: 1rem;
   object-fit: cover;
 }
+
+/* ...existing code... */
+
+.add-contributor-btn {
+  background: var(--button-bg-color);
+  color: var(--button-text-color);
+  border: none;
+  border-radius: 50%;
+  padding: 0.5rem;
+  cursor: pointer;
+  margin-left: 1rem;
+  transition: background-color 0.3s, transform 0.3s;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.add-contributor-btn:hover {
+  background: var(--button-hover-bg-color);
+  transform: translateY(-2px);
+}
+
+.add-contributor-btn:active {
+  background: var(--button-active-bg-color);
+  transform: translateY(0);
+}
+
+/* ...existing code... */
+
+.options-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  position: relative;
+}
+
+.options-menu {
+  position: absolute;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  padding: 0.5rem 0;
+  width: 150px; /* Adjust the width to make it more compact */
+}
+
+.option {
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  color: #333;
+}
+
+.option:hover {
+  background: #f1f3f5;
+}
+
+.delete-option {
+  color: #dc3545;
+}
+
 /* ...existing code... */

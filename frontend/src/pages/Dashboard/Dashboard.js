@@ -24,6 +24,13 @@ const Dashboard = () => {
   const [showEventModal, setShowEventModal] = useState(false);
   const [newEventTitle, setNewEventTitle] = useState("");
   const [profilePicture, setProfilePicture] = useState(null);
+  const [isSharedProject, setIsSharedProject] = useState(false); // Add state for shared project
+  const [showAddContributorModal, setShowAddContributorModal] = useState(false);
+  const [contributorEmail, setContributorEmail] = useState("");
+  const [showProjectOptions, setShowProjectOptions] = useState(false);
+  const [projectOptionsPosition, setProjectOptionsPosition] = useState({ x: 0, y: 0 });
+  const [selectedProjectId, setSelectedProjectId] = useState(null);
+  const [showDeleteProjectModal, setShowDeleteProjectModal] = useState(false);
   const auth = getAuth();
   const user = auth.currentUser;
   const username = user ? user.email.split('@')[0] : '';
@@ -105,15 +112,18 @@ const Dashboard = () => {
           const newProject = {
             id: new Date().getTime().toString(), // Generate a unique ID for the project
             name: newProjectName,
-            type: "personal",
+            type: isSharedProject ? "shared" : "personal", // Set project type based on checkbox
             categories: {},
-            events: []
+            events: [],
+            admin: user.uid, // Set the current user as the admin
+            contributors: isSharedProject ? [user.uid] : [] // Initialize contributors array
           };
           const updatedProjects = [...(userData.projects || []), newProject];
           await updateDoc(userDocRef, { projects: updatedProjects });
           fetchProjects(user.uid); // Refresh projects after adding a new project
           setShowProjectModal(false);
           setNewProjectName("");
+          setIsSharedProject(false); // Reset shared project state
         }
       }
     }
@@ -225,6 +235,32 @@ const Dashboard = () => {
     }
   };
 
+  const addContributor = async (projectId) => {
+    if (contributorEmail) {
+      const user = auth.currentUser;
+      if (user) {
+        const userDocRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          const updatedProjects = userData.projects.map((project) => {
+            if (project.id === projectId) {
+              return {
+                ...project,
+                contributors: [...project.contributors, contributorEmail]
+              };
+            }
+            return project;
+          });
+          await updateDoc(userDocRef, { projects: updatedProjects });
+          fetchProjects(user.uid); // Refresh projects after adding a contributor
+          setShowAddContributorModal(false);
+          setContributorEmail("");
+        }
+      }
+    }
+  };
+
   const handleSortChange = (e) => {
     setSortOption(e.target.value);
     applySort(e.target.value);
@@ -257,6 +293,32 @@ const Dashboard = () => {
     const eventsForToday = events.filter(event => event.date === today);
   
     return { tasksForToday, eventsForToday };
+  };
+
+  const toggleProjectOptions = (event, projectId) => {
+    setSelectedProjectId(projectId);
+    setProjectOptionsPosition({ x: event.clientX, y: event.clientY });
+    setShowProjectOptions(!showProjectOptions);
+  };
+
+  const confirmDeleteProject = () => {
+    setShowDeleteProjectModal(true);
+  };
+
+  const handleDeleteProject = async () => {
+    const user = auth.currentUser;
+    if (user && selectedProjectId) {
+      const userDocRef = doc(db, "users", user.uid);
+      const userDoc = await getDoc(userDocRef);
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        const updatedProjects = userData.projects.filter((project) => project.id !== selectedProjectId);
+        await updateDoc(userDocRef, { projects: updatedProjects });
+        fetchProjects(user.uid); // Refresh projects after deleting a project
+        setShowDeleteProjectModal(false);
+        setShowProjectOptions(false);
+      }
+    }
   };
 
   useEffect(() => {
@@ -297,6 +359,7 @@ const Dashboard = () => {
                 onClick={() => setSelectedTab(project.id)}
               >
                 {project.name} {project.type === "shared" && <span>(Shared)</span>}
+                <button className="options-btn" onClick={(e) => toggleProjectOptions(e, project.id)}>⋮</button>
               </li>
             ))}
           </ul>
@@ -350,7 +413,10 @@ const Dashboard = () => {
           </>
         ) : (
           <>
-            <h2>{projects.find((project) => project.id === selectedTab)?.name}</h2>
+            <h2>
+              {projects.find((project) => project.id === selectedTab)?.name}
+              <button className="add-contributor-btn" onClick={() => setShowAddContributorModal(true)}>+</button>
+            </h2>
             <div className="panel-container">
               {/* Project Tasks Panel */}
               <div className="panel">
@@ -412,8 +478,16 @@ const Dashboard = () => {
                 ref={projectInputRef}
                 onKeyPress={(e) => handleKeyPress(e, addProject)}
               />
+              <label>
+                <input
+                  type="checkbox"
+                  checked={isSharedProject}
+                  onChange={(e) => setIsSharedProject(e.target.checked)}
+                />
+                Shared Project
+              </label>
               <button className="apply-btn" onClick={addProject}>Add Project</button>
-              <button class="cancel-btn" onClick={() => setShowProjectModal(false)}>Cancel</button>
+              <button className="cancel-btn" onClick={() => setShowProjectModal(false)}>Cancel</button>
             </div>
           </div>
         )}
@@ -468,6 +542,38 @@ const Dashboard = () => {
               />
               <button className="apply-btn" onClick={() => addEvent(selectedTab)}>Add Event</button>
               <button className="cancel-btn" onClick={() => setShowEventModal(false)}>Cancel</button>
+            </div>
+          </div>
+        )}
+        {showAddContributorModal && (
+          <div className="modal">
+            <div className="modal-content">
+              <span className="close-btn" onClick={() => setShowAddContributorModal(false)}>&times;</span>
+              <h2>Add Contributor</h2>
+              <input
+                type="email"
+                placeholder="Contributor Email"
+                value={contributorEmail}
+                onChange={(e) => setContributorEmail(e.target.value)}
+              />
+              <button className="apply-btn" onClick={() => addContributor(selectedTab)}>Add</button>
+              <button className="cancel-btn" onClick={() => setShowAddContributorModal(false)}>Cancel</button>
+            </div>
+          </div>
+        )}
+        {showProjectOptions && (
+          <div className="options-menu" style={{ top: projectOptionsPosition.y, left: projectOptionsPosition.x }}>
+            <div className="option delete-option" onClick={confirmDeleteProject}>Delete</div>
+          </div>
+        )}
+        {showDeleteProjectModal && (
+          <div className="modal">
+            <div className="modal-content">
+              <span className="close-btn" onClick={() => setShowDeleteProjectModal(false)}>&times;</span>
+              <h2>Confirm Project Deletion</h2>
+              <p>Are you sure you want to delete this project? This action cannot be undone.</p>
+              <button className="delete-btn" onClick={handleDeleteProject}>Delete</button>
+              <button className="cancel-btn" onClick={() => setShowDeleteProjectModal(false)}>Cancel</button>
             </div>
           </div>
         )}

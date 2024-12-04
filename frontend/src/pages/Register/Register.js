@@ -8,6 +8,7 @@ const Register = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -18,11 +19,12 @@ const Register = () => {
       const user = userCredential.user;
       await setDoc(doc(db, "users", user.uid), {
         email: user.email,
-        tasks: [],
-        events: []
+        projects: [], // Initialize projects array
+        tasks: [], // Initialize tasks array
+        events: [], // Initialize events array
+        profilePicture: null // Initialize profilePicture field
       });
-      alert("Registration successful!");
-      window.location.href = "/signin"; // Navigate to Sign In after success
+      setShowSuccessModal(true); // Show success modal
     } catch (err) {
       setError(err.message);
     }
@@ -52,6 +54,16 @@ const Register = () => {
       <p>
         Already have an account? <a href="/signin">Sign in here</a>.
       </p>
+      {showSuccessModal && (
+        <div className="modal">
+          <div className="modal-content">
+            <span className="close-btn" onClick={() => setShowSuccessModal(false)}>&times;</span>
+            <h2>Registration Successful!</h2>
+            <p>Your account has been created successfully.</p>
+            <button onClick={() => window.location.href = "/signin"}>Go to Sign In</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

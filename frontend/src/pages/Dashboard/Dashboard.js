@@ -1,112 +1,285 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "../../global.css"; // Import global CSS
 import "./dashboard.css";
 import TaskCard from "../../components/TaskCard/TaskCard";
 import EventCard from "../../components/EventCard/EventCard";
-import { db } from "../../firebase"; // Import Firestore
-import { collection, getDocs, addDoc, doc, updateDoc } from "firebase/firestore"; // Import Firestore functions
+import { db, auth } from "../../firebase"; // Import Firestore and Auth
+import { collection, getDocs, addDoc, doc, updateDoc, getDoc } from "firebase/firestore"; // Import Firestore functions
+import { onAuthStateChanged } from "firebase/auth"; // Import onAuthStateChanged
+import { getAuth } from "firebase/auth";
 
 const Dashboard = () => {
   const [projects, setProjects] = useState([]);
   const [selectedTab, setSelectedTab] = useState("overview");
   const [tasks, setTasks] = useState([]);
   const [events, setEvents] = useState([]);
+  const [sortOption, setSortOption] = useState("");
+  const [showProjectModal, setShowProjectModal] = useState(false);
+  const [newProjectName, setNewProjectName] = useState("");
+  const [showSectionModal, setShowSectionModal] = useState(false);
+  const [newSectionName, setNewSectionName] = useState("");
+  const [showTaskModal, setShowTaskModal] = useState(false);
+  const [newTaskTitle, setNewTaskTitle] = useState("");
+  const [selectedSection, setSelectedSection] = useState("");
+  const [showEventModal, setShowEventModal] = useState(false);
+  const [newEventTitle, setNewEventTitle] = useState("");
+  const [profilePicture, setProfilePicture] = useState(null);
+  const auth = getAuth();
+  const user = auth.currentUser;
+  const username = user ? user.email.split('@')[0] : '';
+
+  const projectInputRef = useRef(null);
+  const sectionInputRef = useRef(null);
+  const taskInputRef = useRef(null);
+  const eventInputRef = useRef(null);
+
+  useEffect(() => {
+    if (showProjectModal) projectInputRef.current.focus();
+    if (showSectionModal) sectionInputRef.current.focus();
+    if (showTaskModal) taskInputRef.current.focus();
+    if (showEventModal) eventInputRef.current.focus();
+  }, [showProjectModal, showSectionModal, showTaskModal, showEventModal]);
+
+  const handleKeyPress = (e, action) => {
+    if (e.key === "Enter") {
+      action();
+    }
+  };
 
   // Fetch Projects from Firestore
-  const fetchProjects = async () => {
-    const projectsCollection = collection(db, "projects");
-    const projectsSnapshot = await getDocs(projectsCollection);
-    const projectsList = projectsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    setProjects(projectsList);
+  const fetchProjects = async (userId) => {
+    const userDoc = await getDoc(doc(db, "users", userId));
+    if (userDoc.exists()) {
+      const userData = userDoc.data();
+      const projects = userData.projects || [];
+      setProjects(projects);
 
-    // Aggregate all tasks and events for the overview tab
-    const allTasks = projectsList.flatMap((project) =>
-      project.categories ? Object.entries(project.categories).flatMap(([sectionName, tasks]) =>
-        tasks.map(task => ({ ...task, projectId: project.id, sectionName }))
-      ) : []
-    );
-    const allEvents = projectsList.flatMap((project) =>
-      project.events ? project.events.map(event => ({ ...event, projectId: project.id })) : []
-    );
+      // Extract all tasks from all projects' categories
+      const allTasks = [];
+      const allEvents = [];
 
-    setTasks(allTasks);
-    setEvents(allEvents);
-  };
+      projects.forEach((project) => {
+        // Extract tasks from categories
+        if (project.categories) {
+          Object.entries(project.categories).forEach(([sectionName, tasks]) => {
+            tasks.forEach((task) => {
+              allTasks.push({ ...task, projectId: project.id, sectionName });
+            });
+          });
+        }
 
-  const addTask = async (projectId, sectionName) => {
-    const taskTitle = prompt("Enter the task title:");
-    if (taskTitle) {
-      const newTask = {
-        title: taskTitle,
-        completed: false,
-        priority: "low",
-        description: "",
-        dueDate: ""
-      };
-      const projectDoc = doc(db, "projects", projectId);
-      const projectData = projects.find(project => project.id === projectId);
-      const updatedCategories = {
-        ...projectData.categories,
-        [sectionName]: [...projectData.categories[sectionName], newTask]
-      };
-      await updateDoc(projectDoc, { categories: updatedCategories });
-      fetchProjects(); // Refresh projects after adding a new task
-    }
-  };
-
-  const addEvent = async (projectId) => {
-    const eventTitle = prompt("Enter the event title:");
-    if (eventTitle) {
-      const newEvent = {
-        title: eventTitle,
-        date: "",
-        duration: "all-day",
-        priority: "low",
-        description: ""
-      };
-      const projectDoc = doc(db, "projects", projectId);
-      const projectData = projects.find(project => project.id === projectId);
-      const updatedEvents = [...projectData.events, newEvent];
-      await updateDoc(projectDoc, { events: updatedEvents });
-      fetchProjects(); // Refresh projects after adding a new event
-    }
-  };
-
-  const addProject = async () => {
-    const projectName = prompt("Enter the project name:");
-    if (projectName) {
-      await addDoc(collection(db, "projects"), {
-        name: projectName,
-        type: "personal",
-        categories: {},
-        events: []
+        // Extract events
+        if (project.events) {
+          project.events.forEach((event) => {
+            allEvents.push({ ...event, projectId: project.id });
+          });
+        }
       });
-      fetchProjects(); // Refresh projects after adding a new project
-    }
-  };
 
-  const addSection = async (projectId) => {
-    const sectionName = prompt("Enter the section name:");
-    if (sectionName) {
-      const projectDoc = doc(db, "projects", projectId);
-      const projectData = projects.find(project => project.id === projectId);
-      const updatedCategories = { ...projectData.categories, [sectionName]: [] };
-      await updateDoc(projectDoc, { categories: updatedCategories });
-      fetchProjects(); // Refresh projects after adding a new section
+      setTasks(allTasks);
+      setEvents(allEvents);
     }
   };
 
   useEffect(() => {
-    fetchProjects();
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        fetchProjects(user.uid);
+      } else {
+        // Handle the case where the user is not authenticated
+        console.error("User is not authenticated");
+      }
+    });
+
+    return () => unsubscribe();
   }, []);
+
+  const addProject = async () => {
+    if (newProjectName) {
+      const user = auth.currentUser;
+      if (user) {
+        const userDocRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          const newProject = {
+            id: new Date().getTime().toString(), // Generate a unique ID for the project
+            name: newProjectName,
+            type: "personal",
+            categories: {},
+            events: []
+          };
+          const updatedProjects = [...(userData.projects || []), newProject];
+          await updateDoc(userDocRef, { projects: updatedProjects });
+          fetchProjects(user.uid); // Refresh projects after adding a new project
+          setShowProjectModal(false);
+          setNewProjectName("");
+        }
+      }
+    }
+  };
+
+  const addTask = async (projectId, sectionName) => {
+    if (newTaskTitle) {
+      const user = auth.currentUser;
+      if (user) {
+        const userDocRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          const updatedProjects = userData.projects.map((project) => {
+            if (project.id === projectId) {
+              const updatedCategories = {
+                ...project.categories,
+                [sectionName]: [
+                  ...(project.categories[sectionName] || []),
+                  {
+                    id: new Date().getTime().toString(),
+                    title: newTaskTitle,
+                    completed: false,
+                    priority: "low",
+                    description: "",
+                    dueDate: ""
+                  }
+                ]
+              };
+              return {
+                ...project,
+                categories: updatedCategories
+              };
+            }
+            return project;
+          });
+          await updateDoc(userDocRef, { projects: updatedProjects });
+          fetchProjects(user.uid); // Refresh projects after adding a new task
+          setShowTaskModal(false);
+          setNewTaskTitle("");
+        }
+      }
+    }
+  };
+
+  const addEvent = async (projectId) => {
+    if (newEventTitle) {
+      const user = auth.currentUser;
+      if (user) {
+        const userDocRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          const updatedProjects = userData.projects.map((project) => {
+            if (project.id === projectId) {
+              const updatedEvents = [
+                ...project.events,
+                {
+                  id: new Date().getTime().toString(),
+                  title: newEventTitle,
+                  date: "",
+                  duration: "all-day",
+                  priority: "low",
+                  description: ""
+                }
+              ];
+              return {
+                ...project,
+                events: updatedEvents
+              };
+            }
+            return project;
+          });
+          await updateDoc(userDocRef, { projects: updatedProjects });
+          fetchProjects(user.uid); // Refresh projects after adding a new event
+          setShowEventModal(false);
+          setNewEventTitle("");
+        }
+      }
+    }
+  };
+
+  const addSection = async (projectId) => {
+    if (newSectionName) {
+      const user = auth.currentUser;
+      if (user) {
+        const userDocRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          const updatedProjects = userData.projects.map((project) => {
+            if (project.id === projectId) {
+              return {
+                ...project,
+                categories: {
+                  ...project.categories,
+                  [newSectionName]: []
+                }
+              };
+            }
+            return project;
+          });
+          await updateDoc(userDocRef, { projects: updatedProjects });
+          fetchProjects(user.uid); // Refresh projects after adding a new section
+          setShowSectionModal(false);
+          setNewSectionName("");
+        }
+      }
+    }
+  };
+
+  const handleSortChange = (e) => {
+    setSortOption(e.target.value);
+    applySort(e.target.value);
+  };
+
+  const applySort = (option) => {
+    let sortedTasks = [...tasks];
+    let sortedEvents = [...events];
+
+    if (option === "priority") {
+      const priorityOrder = { "high": 1, "medium": 2, "low": 3 };
+      sortedTasks.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
+      sortedEvents.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
+    } else if (option === "date") {
+      sortedTasks.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+      sortedEvents.sort((a, b) => new Date(a.date) - new Date(b.date));
+    } else if (option === "name") {
+      sortedTasks.sort((a, b) => a.title.localeCompare(b.title));
+      sortedEvents.sort((a, b) => a.title.localeCompare(b.title));
+    }
+
+    setTasks(sortedTasks);
+    setEvents(sortedEvents);
+  };
+
+  const filterTasksAndEventsForToday = () => {
+    const today = new Date().toISOString().split('T')[0]; // Get current date in YYYY-MM-DD format
+  
+    const tasksForToday = tasks.filter(task => task.dueDate === today);
+    const eventsForToday = events.filter(event => event.date === today);
+  
+    return { tasksForToday, eventsForToday };
+  };
+
+  useEffect(() => {
+    const fetchProfilePicture = async () => {
+      if (user) {
+        const userDocRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          setProfilePicture(userData.profilePicture || null);
+        }
+      }
+    };
+    fetchProfilePicture();
+  }, [user]);
 
   return (
     <div className="dashboard-container">
       {/* Sidebar */}
       <aside className="sidebar">
         <div className="user-info">
-          <img src="/path/to/avatar.jpg" alt="User Avatar" />
-          <span className="username">Username</span>
+          <img src={profilePicture || "/path/to/default-avatar.jpg"} alt="User Avatar" />
+          <span className="username">{username}</span>
         </div>
         <div>
           <h2>Projects</h2>
@@ -127,7 +300,7 @@ const Dashboard = () => {
               </li>
             ))}
           </ul>
-          <button className="add-project-btn" onClick={addProject}>+ Add Project</button>
+          <button className="add-project-btn" onClick={() => setShowProjectModal(true)}>+ Add Project</button>
         </div>
         <button className="settings-btn" onClick={() => (window.location.href = "/settings")}>
           Settings
@@ -144,10 +317,15 @@ const Dashboard = () => {
               <div className="panel">
                 <div className="tasks-header">
                   <h3>Tasks</h3>
-                  <button className="filter-btn">Filter By</button>
+                  <select className="sort-select" value={sortOption} onChange={handleSortChange}>
+                    <option value="">Sort By</option>
+                    <option value="priority">Priority</option>
+                    <option value="date">Date</option>
+                    <option value="name">Name</option>
+                  </select>
                 </div>
                 <ul className="tasks-list">
-                  {tasks.map((task) => (
+                  {filterTasksAndEventsForToday().tasksForToday.map((task) => (
                     <TaskCard key={task.id} task={task} projectId={task.projectId} sectionName={task.sectionName} fetchProjects={fetchProjects} />
                   ))}
                 </ul>
@@ -156,8 +334,14 @@ const Dashboard = () => {
               {/* Events Panel */}
               <div className="panel">
                 <h3>Events</h3>
+                <select className="sort-select" value={sortOption} onChange={handleSortChange}>
+                  <option value="">Sort By</option>
+                  <option value="priority">Priority</option>
+                  <option value="date">Date</option>
+                  <option value="name">Name</option>
+                </select>
                 <ul className="events-list">
-                  {events.map((event) => (
+                  {filterTasksAndEventsForToday().eventsForToday.map((event) => (
                     <EventCard key={event.id} event={event} projectId={event.projectId} fetchProjects={fetchProjects} />
                   ))}
                 </ul>
@@ -172,14 +356,20 @@ const Dashboard = () => {
               <div className="panel">
                 <div className="tasks-header">
                   <h3>Tasks</h3>
-                  <button className="add-section-btn" onClick={() => addSection(selectedTab)}>+ Add Section</button>
+                  <button className="add-section-btn" onClick={() => setShowSectionModal(true)}>+ Add Section</button>
+                  <select className="sort-select" value={sortOption} onChange={handleSortChange}>
+                    <option value="">Sort By</option>
+                    <option value="priority">Priority</option>
+                    <option value="date">Date</option>
+                    <option value="name">Name</option>
+                  </select>
                 </div>
                 {projects.find((project) => project.id === selectedTab)?.categories &&
                   Object.entries(projects.find((project) => project.id === selectedTab).categories).map(
                     ([category, tasks]) => (
                       <div key={category}>
                         <h4>{category}</h4>
-                        <button className="add-task-btn" onClick={() => addTask(selectedTab, category)}>+ Add Task</button>
+                        <button className="add-task-btn" onClick={() => { setSelectedSection(category); setShowTaskModal(true); }}>+ Add Task</button>
                         <ul className="tasks-list">
                           {tasks.map((task) => (
                             <TaskCard key={task.id} task={task} projectId={selectedTab} sectionName={category} fetchProjects={fetchProjects} />
@@ -193,7 +383,13 @@ const Dashboard = () => {
               {/* Project Events Panel */}
               <div className="panel">
                 <h3>Events</h3>
-                <button className="add-event-btn" onClick={() => addEvent(selectedTab)}>+ Add Event</button>
+                <button className="add-event-btn" onClick={() => setShowEventModal(true)}>+ Add Event</button>
+                <select className="sort-select" value={sortOption} onChange={handleSortChange}>
+                  <option value="">Sort By</option>
+                  <option value="priority">Priority</option>
+                  <option value="date">Date</option>
+                  <option value="name">Name</option>
+                </select>
                 <ul className="events-list">
                   {projects.find((project) => project.id === selectedTab)?.events.map((event) => (
                     <EventCard key={event.id} event={event} projectId={selectedTab} fetchProjects={fetchProjects} />
@@ -202,6 +398,78 @@ const Dashboard = () => {
               </div>
             </div>
           </>
+        )}
+        {showProjectModal && (
+          <div className="modal">
+            <div className="modal-content">
+              <span className="close-btn" onClick={() => setShowProjectModal(false)}>&times;</span>
+              <h2>Add New Project</h2>
+              <input
+                type="text"
+                placeholder="Project Name"
+                value={newProjectName}
+                onChange={(e) => setNewProjectName(e.target.value)}
+                ref={projectInputRef}
+                onKeyPress={(e) => handleKeyPress(e, addProject)}
+              />
+              <button className="apply-btn" onClick={addProject}>Add Project</button>
+              <button class="cancel-btn" onClick={() => setShowProjectModal(false)}>Cancel</button>
+            </div>
+          </div>
+        )}
+        {showSectionModal && (
+          <div className="modal">
+            <div className="modal-content">
+              <span className="close-btn" onClick={() => setShowSectionModal(false)}>&times;</span>
+              <h2>Add New Section</h2>
+              <input
+                type="text"
+                placeholder="Section Name"
+                value={newSectionName}
+                onChange={(e) => setNewSectionName(e.target.value)}
+                ref={sectionInputRef}
+                onKeyPress={(e) => handleKeyPress(e, () => addSection(selectedTab))}
+              />
+              <button className="apply-btn" onClick={() => addSection(selectedTab)}>Add Section</button>
+              <button className="cancel-btn" onClick={() => setShowSectionModal(false)}>Cancel</button>
+            </div>
+          </div>
+        )}
+        {showTaskModal && (
+          <div className="modal">
+            <div className="modal-content">
+              <span className="close-btn" onClick={() => setShowTaskModal(false)}>&times;</span>
+              <h2>Add New Task</h2>
+              <input
+                type="text"
+                placeholder="Task Title"
+                value={newTaskTitle}
+                onChange={(e) => setNewTaskTitle(e.target.value)}
+                ref={taskInputRef}
+                onKeyPress={(e) => handleKeyPress(e, () => addTask(selectedTab, selectedSection))}
+              />
+              <button className="apply-btn" onClick={() => addTask(selectedTab, selectedSection)}>Add Task</button>
+              <button className="cancel-btn" onClick={() => setShowTaskModal(false)}>Cancel</button>
+            </div>
+          </div>
+        )}
+        {showEventModal && (
+          <div className="modal">
+            <div className="modal-content">
+              <span className="close-btn" onClick={() => setShowEventModal(false)}>&times;</span>
+              <h2>Add New Event</h2>
+              <input
+                type="text"
+                placeholder="Event Title"
+                value={newEventTitle}
+                onChange={(e) => setNewEventTitle(e.target.value)}
+                ref={eventInputRef}
+                onKeyPress={(e) => handleKeyPress(e, () => addEvent(selectedTab))}
+              />
+              <button className="apply-btn" onClick={() => addEvent(selectedTab)}>Add Event</button>
+              <button className="cancel-btn" onClick={() => setShowEventModal(false)}>Cancel</button>
+            </div>
+          </div>
         )}
       </main>
     </div>

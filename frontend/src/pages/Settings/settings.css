@@ -101,3 +101,105 @@
   margin-bottom: 1rem;
   font-size: 1.5rem;
 }
+
+/* Profile Picture Section */
+.profile-picture-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.profile-picture {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 1rem;
+}
+
+.profile-picture-section input[type="file"] {
+  display: block;
+}
+
+/* Modal Styles */
+.modal {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal-content {
+  background-color: #fefefe;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+  max-width: 500px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
+  margin: auto;
+  text-align: center;
+}
+
+.close-btn {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close-btn:hover,
+.close-btn:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.modal-content h2 {
+  margin-top: 0;
+}
+
+.modal-content button {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.modal-content .delete-btn {
+  background-color: #dc3545;
+  color: white;
+}
+
+.modal-content .delete-btn:hover {
+  background-color: #c82333;
+}
+
+.modal-content .delete-btn:active {
+  background-color: #a71d2a;
+}
+
+.modal-content .cancel-btn {
+  background-color: #6c757d;
+  color: white;
+  margin-left: 1rem;
+}
+
+.modal-content .cancel-btn:hover {
+  background-color: #5a6268;
+}
+
+.modal-content .cancel-btn:active {
+  background-color: #545b62;
+}

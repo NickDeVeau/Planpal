@@ -44,3 +44,18 @@
   .signin-container button:hover {
     background-color: var(--dark-primary-color);
   }
+
+  .google-signin-btn {
+    margin-top: 1rem;
+    padding: 0.7rem;
+    font-size: 1rem;
+    color: var(--secondary-color);
+    background-color: #db4437; /* Google Red */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .google-signin-btn:hover {
+    background-color: #c23321;
+  }

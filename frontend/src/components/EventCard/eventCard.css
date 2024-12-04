@@ -218,6 +218,7 @@ body, html {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   position: relative;
   margin: auto;
+  text-align: center;
 }
 
 .close-btn {
@@ -269,6 +270,42 @@ body, html {
 
 .modal-content .save-btn:active {
   background-color: #1e7e34;
+}
+
+.modal-content button {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.modal-content .delete-btn {
+  background-color: #dc3545;
+  color: white;
+}
+
+.modal-content .delete-btn:hover {
+  background-color: #c82333;
+}
+
+.modal-content .delete-btn:active {
+  background-color: #a71d2a;
+}
+
+.modal-content .cancel-btn {
+  background-color: #6c757d;
+  color: white;
+  margin-left: 1rem;
+}
+
+.modal-content .cancel-btn:hover {
+  background-color: #5a6268;
+}
+
+.modal-content .cancel-btn:active {
+  background-color: #545b62;
 }
 
 .expired {

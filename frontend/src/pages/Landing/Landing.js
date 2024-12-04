@@ -6,7 +6,7 @@ const Landing = () => {
   return (
     <div className="landing-container">
       <header className="landing-header">
-        <img src="/assets/images/logo.svg" alt="PlanPal Logo" className="logo" />
+        <img src="/logo.svg" alt="PlanPal Logo" className="logo" />
         <nav>
           <a href="/signin">Sign In</a>
           <a href="/register" className="cta-button">Get Started</a>

@@ -2,11 +2,12 @@ import React, { useState, useEffect, useRef } from "react";
 import ReactDOM from "react-dom";
 import "./eventCard.css";
 import { doc, updateDoc, getDoc } from "firebase/firestore"; // Import Firestore functions
-import { db } from "../../firebase"; // Import Firestore
+import { db, auth } from "../../firebase"; // Import Firestore and auth
 
 const EventCard = ({ event, projectId, fetchProjects }) => {
   const [showOptions, setShowOptions] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [editedEvent, setEditedEvent] = useState({ ...event });
   const optionsRef = useRef(null);
   const [expired, setExpired] = useState(false);
@@ -26,29 +27,52 @@ const EventCard = ({ event, projectId, fetchProjects }) => {
   };
 
   const handleSave = async () => {
-    if (!projectId) {
-      console.error("Project ID is undefined");
-      return;
+    const user = auth.currentUser;
+    if (user) {
+      const userDocRef = doc(db, "users", user.uid);
+      const userDoc = await getDoc(userDocRef);
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        const updatedProjects = userData.projects.map((project) => {
+          if (project.id === projectId) {
+            const updatedEvents = project.events?.map((e) =>
+              e.id === event.id ? { ...e, ...editedEvent } : e
+            ) || [];
+            return {
+              ...project,
+              events: updatedEvents
+            };
+          }
+          return project;
+        });
+        await updateDoc(userDocRef, { projects: updatedProjects });
+        setIsEditing(false);
+        fetchProjects(user.uid); // Ensure user ID is passed to fetchProjects
+      }
     }
-    const projectDocRef = doc(db, "projects", projectId);
-    const projectSnapshot = await getDoc(projectDocRef);
-    const projectData = projectSnapshot.data();
-    const updatedEvents = projectData.events.map(e =>
-      e.title === event.title ? { ...e, ...editedEvent } : e
-    );
-    await updateDoc(projectDocRef, { events: updatedEvents });
-    setIsEditing(false);
-    fetchProjects(); // Refresh projects after editing event
   };
 
   const handleDelete = async () => {
-    if (window.confirm("Are you sure you want to delete this event?")) {
-      const projectDocRef = doc(db, "projects", projectId);
-      const projectSnapshot = await getDoc(projectDocRef);
-      const projectData = projectSnapshot.data();
-      const updatedEvents = projectData.events.filter(e => e.title !== event.title);
-      await updateDoc(projectDocRef, { events: updatedEvents });
-      fetchProjects(); // Refresh projects after deleting event
+    const user = auth.currentUser;
+    if (user) {
+      const userDocRef = doc(db, "users", user.uid);
+      const userDoc = await getDoc(userDocRef);
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        const updatedProjects = userData.projects.map((project) => {
+          if (project.id === projectId) {
+            const updatedEvents = project.events.filter((e) => e.id !== event.id);
+            return {
+              ...project,
+              events: updatedEvents
+            };
+          }
+          return project;
+        });
+        await updateDoc(userDocRef, { projects: updatedProjects });
+        fetchProjects(user.uid); // Ensure user ID is passed to fetchProjects
+        setShowDeleteModal(false); // Close the delete modal
+      }
     }
   };
 
@@ -158,13 +182,24 @@ const EventCard = ({ event, projectId, fetchProjects }) => {
           {showOptions && (
             <div className="options-menu" ref={optionsRef}>
               <div className="option" onClick={handleEdit}>Edit</div>
-              <div className="option delete-option" onClick={handleDelete}>Delete</div>
+              <div className="option delete-option" onClick={() => setShowDeleteModal(true)}>Delete</div>
             </div>
           )}
         </div>
         <p className="event-description">{event.description}</p>
       </li>
       {isEditing && ReactDOM.createPortal(modal, document.body)}
+      {showDeleteModal && (
+        <div className="modal">
+          <div className="modal-content">
+            <span className="close-btn" onClick={() => setShowDeleteModal(false)}>&times;</span>
+            <h2>Confirm Event Deletion</h2>
+            <p>Are you sure you want to delete this event? This action cannot be undone.</p>
+            <button className="delete-btn" onClick={handleDelete}>Delete Event</button>
+            <button className="cancel-btn" onClick={() => setShowDeleteModal(false)}>Cancel</button>
+          </div>
+        </div>
+      )}
     </>
   );
 };

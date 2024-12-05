@@ -65,6 +65,7 @@ body, html {
   box-shadow: 2px 0 8px rgba(0,0,0,0.1);
   display: flex;
   flex-direction: column;
+  
 }
 .sidebar .user-info {
   display: flex;
@@ -97,6 +98,9 @@ body, html {
   border-radius: var(--border-radius);
   cursor: pointer;
   transition: background-color 0.3s;
+  display: flex; /* Use flexbox */
+  align-items: center; /* Vertically center the content */
+  height: 3rem; /* Set a consistent height */
 }
 .sidebar li:hover {
   background-color: var(--sidebar-link-hover-bg-color);
@@ -397,6 +401,8 @@ button:active {
   display: flex; /* Use flexbox */
   align-items: center; /* Vertically center the content */
   margin-bottom: 1rem;
+  padding: 0px;
+  margin: 0px;
 }
 
 /* Contributors */

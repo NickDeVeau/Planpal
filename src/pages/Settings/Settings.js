@@ -169,67 +169,69 @@ const Settings = () => {
               .map(project => (
                 <div key={project.id} className="project-permissions">
                   <h4>{project.name}</h4>
-                  {project.contributors.map(contributorId => (
-                    <div key={contributorId} className="contributor-permissions">
-                      <span>{contributorEmails[contributorId]}</span>
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={project.permissions?.[contributorId]?.canEditTasks || false}
-                          onChange={(e) => handlePermissionChange(project.id, contributorId, "canEditTasks", e.target.checked)}
-                        />
-                        Can Edit Tasks
-                      </label>
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={project.permissions?.[contributorId]?.canAddTasks || false}
-                          onChange={(e) => handlePermissionChange(project.id, contributorId, "canAddTasks", e.target.checked)}
-                        />
-                        Can Add Tasks
-                      </label>
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={project.permissions?.[contributorId]?.canDeleteTasks || false}
-                          onChange={(e) => handlePermissionChange(project.id, contributorId, "canDeleteTasks", e.target.checked)}
-                        />
-                        Can Delete Tasks
-                      </label>
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={project.permissions?.[contributorId]?.canEditEvents || false}
-                          onChange={(e) => handlePermissionChange(project.id, contributorId, "canEditEvents", e.target.checked)}
-                        />
-                        Can Edit Events
-                      </label>
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={project.permissions?.[contributorId]?.canAddEvents || false}
-                          onChange={(e) => handlePermissionChange(project.id, contributorId, "canAddEvents", e.target.checked)}
-                        />
-                        Can Add Events
-                      </label>
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={project.permissions?.[contributorId]?.canDeleteEvents || false}
-                          onChange={(e) => handlePermissionChange(project.id, contributorId, "canDeleteEvents", e.target.checked)}
-                        />
-                        Can Delete Events
-                      </label>
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={project.permissions?.[contributorId]?.canEditSections || false}
-                          onChange={(e) => handlePermissionChange(project.id, contributorId, "canEditSections", e.target.checked)}
-                        />
-                        Can Edit Sections
-                      </label>
-                    </div>
-                  ))}
+                  {project.contributors
+                    .filter(contributorId => contributorId !== user.uid)
+                    .map(contributorId => (
+                      <div key={contributorId} className="contributor-permissions">
+                        <span>{contributorEmails[contributorId]}</span>
+                        <label>
+                          <input
+                            type="checkbox"
+                            checked={project.permissions?.[contributorId]?.canEditTasks || false}
+                            onChange={(e) => handlePermissionChange(project.id, contributorId, "canEditTasks", e.target.checked)}
+                          />
+                          Can Edit Tasks
+                        </label>
+                        <label>
+                          <input
+                            type="checkbox"
+                            checked={project.permissions?.[contributorId]?.canAddTasks || false}
+                            onChange={(e) => handlePermissionChange(project.id, contributorId, "canAddTasks", e.target.checked)}
+                          />
+                          Can Add Tasks
+                        </label>
+                        <label>
+                          <input
+                            type="checkbox"
+                            checked={project.permissions?.[contributorId]?.canDeleteTasks || false}
+                            onChange={(e) => handlePermissionChange(project.id, contributorId, "canDeleteTasks", e.target.checked)}
+                          />
+                          Can Delete Tasks
+                        </label>
+                        <label>
+                          <input
+                            type="checkbox"
+                            checked={project.permissions?.[contributorId]?.canEditEvents || false}
+                            onChange={(e) => handlePermissionChange(project.id, contributorId, "canEditEvents", e.target.checked)}
+                          />
+                          Can Edit Events
+                        </label>
+                        <label>
+                          <input
+                            type="checkbox"
+                            checked={project.permissions?.[contributorId]?.canAddEvents || false}
+                            onChange={(e) => handlePermissionChange(project.id, contributorId, "canAddEvents", e.target.checked)}
+                          />
+                          Can Add Events
+                        </label>
+                        <label>
+                          <input
+                            type="checkbox"
+                            checked={project.permissions?.[contributorId]?.canDeleteEvents || false}
+                            onChange={(e) => handlePermissionChange(project.id, contributorId, "canDeleteEvents", e.target.checked)}
+                          />
+                          Can Delete Events
+                        </label>
+                        <label>
+                          <input
+                            type="checkbox"
+                            checked={project.permissions?.[contributorId]?.canEditSections || false}
+                            onChange={(e) => handlePermissionChange(project.id, contributorId, "canEditSections", e.target.checked)}
+                          />
+                          Can Edit Sections
+                        </label>
+                      </div>
+                    ))}
                 </div>
               ))}
           </div>

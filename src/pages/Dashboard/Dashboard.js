@@ -5,7 +5,7 @@ import TaskCard from "../../components/TaskCard/TaskCard";
 import EventCard from "../../components/EventCard/EventCard";
 import { db } from "../../firebase"; // Import Firestore
 import { doc, updateDoc, getDoc, query, where, collection, getDocs, onSnapshot, arrayUnion, arrayRemove, setDoc, deleteDoc } from "firebase/firestore"; // Update imports
-import { onAuthStateChanged } from "firebase/auth"; // Import onAuthStateChanged
+import { onAuthStateChanged, sendEmailVerification, signOut } from "firebase/auth"; // Import onAuthStateChanged
 import { getAuth } from "firebase/auth";
 
 const Dashboard = () => {
@@ -32,6 +32,7 @@ const Dashboard = () => {
   const [selectedProjectId, setSelectedProjectId] = useState(null);
   const [showDeleteProjectModal, setShowDeleteProjectModal] = useState(false);
   const [contributorDetails, setContributorDetails] = useState([]);
+  const [isEmailVerified, setIsEmailVerified] = useState(true);
   const auth = getAuth();
   const user = auth.currentUser;
   const username = user ? user.email.split('@')[0] : '';
@@ -47,6 +48,17 @@ const Dashboard = () => {
     if (showTaskModal) taskInputRef.current.focus();
     if (showEventModal) eventInputRef.current.focus();
   }, [showProjectModal, showSectionModal, showTaskModal, showEventModal]);
+
+  useEffect(() => {
+    const user = auth.currentUser;
+    if (user && process.env.REACT_APP_REQUIRE_EMAIL_VERIFICATION === 'true' && !user.emailVerified) {
+      signOut(auth);
+      alert("Please verify your email address before accessing the dashboard.");
+      window.location.href = "/signin";
+    } else if (user) {
+      setIsEmailVerified(user.emailVerified);
+    }
+  }, []);
 
   const handleKeyPress = (e, action) => {
     if (e.key === "Enter") {
@@ -398,8 +410,21 @@ const Dashboard = () => {
     fetchProfilePicture();
   }, [user]);
 
+  const sendVerificationEmail = async () => {
+    const user = auth.currentUser;
+    if (user) {
+      await sendEmailVerification(user);
+      alert('Verification email sent.');
+    }
+  };
+
   return (
     <div className="dashboard-container">
+      {!isEmailVerified && (
+        <div className="verification-banner">
+          <p>Please verify your email address. <button onClick={sendVerificationEmail}>Resend Email</button></p>
+        </div>
+      )}
       {/* Sidebar */}
       <aside className="sidebar">
         <div className="user-info">

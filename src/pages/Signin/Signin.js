@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore"; // Import Firestore functions
 import { auth, db } from "../../firebase"; // Import Firestore
 import "../../global.css"; // Import global CSS
@@ -16,6 +16,13 @@ const Signin = () => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
+
+      if (process.env.REACT_APP_REQUIRE_EMAIL_VERIFICATION === 'true' && !user.emailVerified) {
+        await signOut(auth);
+        setError("Please verify your email address before signing in.");
+        return;
+      }
+
       const userDoc = await getDoc(doc(db, "users", user.uid));
       if (userDoc.exists()) {
         const userData = userDoc.data();

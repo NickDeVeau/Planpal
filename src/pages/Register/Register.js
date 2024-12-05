@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore"; // Import Firestore functions
 import { db } from "../../firebase"; // Import Firestore
 import "./register.css";
@@ -17,6 +17,10 @@ const Register = () => {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
+
+      // Send email verification
+      await sendEmailVerification(user);
+
       await setDoc(doc(db, "users", user.uid), {
         email: user.email,
         projects: [], // Initialize projects array
@@ -24,6 +28,7 @@ const Register = () => {
         events: [], // Initialize events array
         profilePicture: null // Initialize profilePicture field
       });
+
       setShowSuccessModal(true); // Show success modal
     } catch (err) {
       setError(err.message);
@@ -59,7 +64,7 @@ const Register = () => {
           <div className="modal-content">
             <span className="close-btn" onClick={() => setShowSuccessModal(false)}>&times;</span>
             <h2>Registration Successful!</h2>
-            <p>Your account has been created successfully.</p>
+            <p>A verification email has been sent to your email address. Please check your inbox to verify your account.</p>
             <button onClick={() => window.location.href = "/signin"}>Go to Sign In</button>
           </div>
         </div>

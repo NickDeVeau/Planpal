@@ -778,3 +778,22 @@ body, html {
   margin-right: 0.5rem;
   font-size: 0.9rem;
 }
+
+/* ...existing code... */
+
+.verification-banner {
+  background-color: #fff3cd;
+  color: #856404;
+  padding: 1rem;
+  text-align: center;
+}
+
+.verification-banner button {
+  background: none;
+  border: none;
+  color: #007bff;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* ...existing code... */

@@ -1,8 +1,9 @@
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Allow read and write access to all users under the "users" collection
+    // Allow authenticated users to read user documents
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read: if request.auth != null;
+      allow write: if request.auth.uid == userId;
     }
 
     // Allow read access to all users under the "projects" collection

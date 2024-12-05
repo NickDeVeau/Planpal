@@ -740,6 +740,33 @@ body, html {
 /* ...existing code... */
 
 .contributors-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.contributor-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.contributor-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.contributor-email {
+  font-size: 0.9rem;
+  color: var(--text-color);
+}
+
+/* ...existing code... */
+
+.contributors-list {
   display: inline-block;
   margin-left: 1rem;
 }

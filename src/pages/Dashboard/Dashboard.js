@@ -31,7 +31,7 @@ const Dashboard = () => {
   const [projectOptionsPosition, setProjectOptionsPosition] = useState({ x: 0, y: 0 });
   const [selectedProjectId, setSelectedProjectId] = useState(null);
   const [showDeleteProjectModal, setShowDeleteProjectModal] = useState(false);
-  const [contributorEmails, setContributorEmails] = useState([]);
+  const [contributorDetails, setContributorDetails] = useState([]);
   const auth = getAuth();
   const user = auth.currentUser;
   const username = user ? user.email.split('@')[0] : '';
@@ -358,29 +358,29 @@ const Dashboard = () => {
     }
   };
 
+  const loadContributorDetails = async () => {
+    const project = projects.find((project) => project.id === selectedTab);
+    if (project) {
+      const contributorDetails = await Promise.all(
+        project.contributors.map(async (contributorId) => {
+          const contributorDoc = await getDoc(doc(db, "users", contributorId));
+          if (contributorDoc.exists()) {
+            const contributorData = contributorDoc.data();
+            return {
+              email: contributorData.email,
+              profilePicture: contributorData.profilePicture || "/path/to/default-avatar.jpg"
+            };
+          }
+          return null;
+        })
+      );
+      setContributorDetails(contributorDetails.filter(detail => detail !== null));
+    }
+  };
+
   useEffect(() => {
-    const fetchContributorEmails = async (contributorIds) => {
-      const emails = [];
-      for (const id of contributorIds) {
-        const contributorDoc = await getDoc(doc(db, "users", id));
-        if (contributorDoc.exists()) {
-          const contributorData = contributorDoc.data();
-          emails.push(contributorData.email);
-        }
-      }
-      return emails;
-    };
-  
-    const loadContributorEmails = async () => {
-      const project = projects.find((project) => project.id === selectedTab);
-      if (project) {
-        const emails = await fetchContributorEmails(project.contributors);
-        setContributorEmails(emails);
-      }
-    };
-  
     if (selectedTab !== "overview") {
-      loadContributorEmails();
+      loadContributorDetails();
     }
   }, [selectedTab, projects]);
 
@@ -480,10 +480,11 @@ const Dashboard = () => {
               {projects.find((project) => project.id === selectedTab)?.name}
               <button className="add-contributor-btn" onClick={() => setShowAddContributorModal(true)}>+</button>
               <div className="contributors-list">
-                {contributorEmails.map((email) => (
-                  <span key={email} className="contributor-email">
-                    {email.split('@')[0]}
-                  </span>
+                {contributorDetails.map((contributor) => (
+                  <div key={contributor.email} className="contributor-item">
+                    <img src={contributor.profilePicture} alt="Contributor Avatar" className="contributor-avatar" />
+                    <span className="contributor-email">{contributor.email.split('@')[0]}</span>
+                  </div>
                 ))}
               </div>
             </h2>

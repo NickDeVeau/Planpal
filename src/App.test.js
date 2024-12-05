@@ -1,11 +1,28 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import React from 'react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import App from './App';
+import Landing from './pages/Landing/Landing';
 
-// Group 1: Invitation Entry Validation Scenarios
-test('Scenario 1.1: Invitation Entry with Incorrect Username', () => {
-  render(<App />);
-  
-  //Force Pass
-  expect(true).toBe(true);
+test('renders Landing page correctly', () => {
+  render(
+    <Landing />
+  );
+
+  // Check if the title is rendered
+  const titleElement = screen.getByTestId('landing-title');
+  expect(titleElement).toBeInTheDocument();
+
+  // Check if the description is rendered
+  const descriptionElement = screen.getByTestId('landing-description');
+  expect(descriptionElement).toBeInTheDocument();
+
+  // Check if the Sign In link is rendered
+  const signInLink = screen.getByTestId('signin-link');
+  expect(signInLink).toBeInTheDocument();
+
+  // Check if the Get Started button is rendered
+  const getStartedButton = screen.getByTestId('header-get-started-button');
+  expect(getStartedButton).toBeInTheDocument();
 });
+
 

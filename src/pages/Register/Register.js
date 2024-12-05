@@ -37,7 +37,7 @@ const Register = () => {
 
   return (
     <div className="register-container">
-      <h1>Register</h1>
+      <h1 id="register-title" data-testid="register-title">Register</h1>
       <form onSubmit={handleSubmit}>
         <input
           type="email"
@@ -45,6 +45,8 @@ const Register = () => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
+          id="register-email"
+          data-testid="register-email"
         />
         <input
           type="password"
@@ -52,6 +54,8 @@ const Register = () => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
+          id="register-password"
+          data-testid="register-password"
         />
         {error && <p className="error">{error}</p>}
         <button type="submit">Register</button>

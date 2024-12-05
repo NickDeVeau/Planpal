@@ -181,28 +181,20 @@ const Dashboard = () => {
 
   const addSection = async (projectId) => {
     if (newSectionName) {
-      const user = auth.currentUser;
-      if (user) {
-        const userDocRef = doc(db, "users", user.uid);
-        const userDoc = await getDoc(userDocRef);
-        if (userDoc.exists()) {
-          const userData = userDoc.data();
-          const updatedProjects = userData.projects.map((project) => {
-            if (project.id === projectId) {
-              return {
-                ...project,
-                categories: {
-                  ...project.categories,
-                  [newSectionName]: []
-                }
-              };
-            }
-            return project;
-          });
-          await updateDoc(userDocRef, { projects: updatedProjects });
-          fetchProjects(user.uid); // Refresh projects after adding a new section
+      const projectRef = doc(db, "projects", projectId);
+      const projectDoc = await getDoc(projectRef);
+      if (projectDoc.exists()) {
+        const projectData = projectDoc.data();
+        if (projectData.contributors.includes(auth.currentUser.uid)) {
+          const updatedCategories = {
+            ...projectData.categories,
+            [newSectionName]: []
+          };
+          await updateDoc(projectRef, { categories: updatedCategories });
           setShowSectionModal(false);
           setNewSectionName("");
+        } else {
+          alert("You do not have permission to add a section to this project.");
         }
       }
     }

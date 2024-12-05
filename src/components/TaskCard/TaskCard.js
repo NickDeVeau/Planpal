@@ -25,28 +25,21 @@ const TaskCard = ({ task, projectId, sectionName, fetchProjects }) => {
     setCompleted(!completed);
     const user = auth.currentUser;
     if (user) {
-      const userDocRef = doc(db, "users", user.uid);
-      const userDoc = await getDoc(userDocRef);
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        const updatedProjects = userData.projects.map((project) => {
-          if (project.id === projectId) {
-            const updatedCategories = {
-              ...project.categories,
-              [sectionName]: project.categories[sectionName].map((t) =>
-                t.id === task.id ? { ...t, completed: !completed } : t
-              )
-            };
-            return {
-              ...project,
-              categories: updatedCategories
-            };
-          }
-          return project;
-        });
-        await updateDoc(userDocRef, { projects: updatedProjects });
-        fetchProjects(); // Refresh projects after updating task completion status
+      const projectRef = doc(db, "projects", projectId);
+      const projectDoc = await getDoc(projectRef);
+      if (projectDoc.exists()) {
+        const projectData = projectDoc.data();
+        const updatedCategories = {
+          ...projectData.categories,
+          [sectionName]: projectData.categories[sectionName].map((t) =>
+            t.id === task.id ? { ...t, completed: !completed } : t
+          )
+        };
+        await updateDoc(projectRef, { categories: updatedCategories });
+        fetchProjects(user.uid); // Refresh projects after updating task completion status
       }
+    } else {
+      console.error("User is not authenticated");
     }
   };
 
@@ -57,28 +50,23 @@ const TaskCard = ({ task, projectId, sectionName, fetchProjects }) => {
   const handleSave = async () => {
     const user = auth.currentUser;
     if (user) {
-      const userDocRef = doc(db, "users", user.uid);
-      const userDoc = await getDoc(userDocRef);
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        const updatedProjects = userData.projects.map((project) => {
-          if (project.id === projectId) {
-            const updatedCategories = {
-              ...project.categories,
-              [sectionName]: project.categories[sectionName]?.map((t) =>
-                t.id === task.id ? { ...t, ...editedTask } : t
-              ) || []
-            };
-            return {
-              ...project,
-              categories: updatedCategories
-            };
-          }
-          return project;
-        });
-        await updateDoc(userDocRef, { projects: updatedProjects });
-        setIsEditing(false);
-        fetchProjects(user.uid); // Ensure user ID is passed to fetchProjects
+      const projectRef = doc(db, "projects", projectId);
+      const projectDoc = await getDoc(projectRef);
+      if (projectDoc.exists()) {
+        const projectData = projectDoc.data();
+        if (projectData.contributors.includes(user.uid)) {
+          const updatedCategories = {
+            ...projectData.categories,
+            [sectionName]: projectData.categories[sectionName].map((t) =>
+              t.id === task.id ? { ...t, ...editedTask } : t
+            )
+          };
+          await updateDoc(projectRef, { categories: updatedCategories });
+          setIsEditing(false);
+          fetchProjects(user.uid); // Refresh projects after editing task
+        } else {
+          alert("You do not have permission to edit this task.");
+        }
       }
     }
   };

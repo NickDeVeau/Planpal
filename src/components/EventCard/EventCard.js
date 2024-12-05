@@ -29,25 +29,20 @@ const EventCard = ({ event, projectId, fetchProjects }) => {
   const handleSave = async () => {
     const user = auth.currentUser;
     if (user) {
-      const userDocRef = doc(db, "users", user.uid);
-      const userDoc = await getDoc(userDocRef);
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        const updatedProjects = userData.projects.map((project) => {
-          if (project.id === projectId) {
-            const updatedEvents = project.events?.map((e) =>
-              e.id === event.id ? { ...e, ...editedEvent } : e
-            ) || [];
-            return {
-              ...project,
-              events: updatedEvents
-            };
-          }
-          return project;
-        });
-        await updateDoc(userDocRef, { projects: updatedProjects });
-        setIsEditing(false);
-        fetchProjects(user.uid); // Ensure user ID is passed to fetchProjects
+      const projectRef = doc(db, "projects", projectId);
+      const projectDoc = await getDoc(projectRef);
+      if (projectDoc.exists()) {
+        const projectData = projectDoc.data();
+        if (projectData.contributors.includes(user.uid)) {
+          const updatedEvents = projectData.events.map((e) =>
+            e.id === event.id ? { ...e, ...editedEvent } : e
+          );
+          await updateDoc(projectRef, { events: updatedEvents });
+          setIsEditing(false);
+          fetchProjects(user.uid); // Refresh projects after editing event
+        } else {
+          alert("You do not have permission to edit this event.");
+        }
       }
     }
   };

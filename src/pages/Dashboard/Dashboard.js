@@ -171,7 +171,7 @@ const Dashboard = () => {
                 completed: false,
                 priority: "low",
                 description: "",
-                dueDate: ""
+                dueDate: new Date().toISOString().split('T')[0] // Set to current date
               }
             ]
           };
@@ -197,7 +197,7 @@ const Dashboard = () => {
             {
               id: new Date().getTime().toString(),
               title: newEventTitle,
-              date: "",
+              date: new Date().toISOString().split('T')[0], // Set to current date
               duration: "all-day",
               priority: "low",
               description: ""

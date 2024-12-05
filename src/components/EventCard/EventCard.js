@@ -22,52 +22,79 @@ const EventCard = ({ event, projectId, fetchProjects }) => {
     }
   };
 
-  const handleEdit = () => {
-    setIsEditing(true);
-  };
-
-  const handleSave = async () => {
+  const checkPermissions = async (permissionType) => {
     const user = auth.currentUser;
     if (user) {
-      const projectRef = doc(db, "projects", projectId);
+      const projectRef = doc(db, 'projects', projectId);
       const projectDoc = await getDoc(projectRef);
       if (projectDoc.exists()) {
         const projectData = projectDoc.data();
-        if (projectData.contributors.includes(user.uid)) {
-          const updatedEvents = projectData.events.map((e) =>
-            e.id === event.id ? { ...e, ...editedEvent } : e
-          );
-          await updateDoc(projectRef, { events: updatedEvents });
-          setIsEditing(false);
-          fetchProjects(user.uid); // Refresh projects after editing event
-        } else {
-          alert("You do not have permission to edit this event.");
+        // Admin has all permissions
+        if (projectData.admin === user.uid) return true;
+        return projectData.permissions?.[user.uid]?.[permissionType];
+      }
+    }
+    return false;
+  };
+
+  const handleEdit = async () => {
+    if (await checkPermissions('canEditEvents')) {
+      setIsEditing(true);
+    } else {
+      alert('You do not have permission to edit events.');
+    }
+  };
+
+  const handleSave = async () => {
+    if (await checkPermissions('canEditEvents')) {
+      const user = auth.currentUser;
+      if (user) {
+        const projectRef = doc(db, "projects", projectId);
+        const projectDoc = await getDoc(projectRef);
+        if (projectDoc.exists()) {
+          const projectData = projectDoc.data();
+          if (projectData.contributors.includes(user.uid)) {
+            const updatedEvents = projectData.events.map((e) =>
+              e.id === event.id ? { ...e, ...editedEvent } : e
+            );
+            await updateDoc(projectRef, { events: updatedEvents });
+            setIsEditing(false);
+            fetchProjects(user.uid); // Refresh projects after editing event
+          } else {
+            alert("You do not have permission to edit this event.");
+          }
         }
       }
+    } else {
+      alert('You do not have permission to save changes to this event.');
     }
   };
 
   const handleDelete = async () => {
-    const user = auth.currentUser;
-    if (user) {
-      const userDocRef = doc(db, "users", user.uid);
-      const userDoc = await getDoc(userDocRef);
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        const updatedProjects = userData.projects.map((project) => {
-          if (project.id === projectId) {
-            const updatedEvents = project.events.filter((e) => e.id !== event.id);
-            return {
-              ...project,
-              events: updatedEvents
-            };
-          }
-          return project;
-        });
-        await updateDoc(userDocRef, { projects: updatedProjects });
-        fetchProjects(user.uid); // Ensure user ID is passed to fetchProjects
-        setShowDeleteModal(false); // Close the delete modal
+    if (await checkPermissions('canDeleteEvents')) {
+      const user = auth.currentUser;
+      if (user) {
+        const userDocRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          const updatedProjects = userData.projects.map((project) => {
+            if (project.id === projectId) {
+              const updatedEvents = project.events.filter((e) => e.id !== event.id);
+              return {
+                ...project,
+                events: updatedEvents
+              };
+            }
+            return project;
+          });
+          await updateDoc(userDocRef, { projects: updatedProjects });
+          fetchProjects(user.uid); // Ensure user ID is passed to fetchProjects
+          setShowDeleteModal(false); // Close the delete modal
+        }
       }
+    } else {
+      alert('You do not have permission to delete events.');
     }
   };
 

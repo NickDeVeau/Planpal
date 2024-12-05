@@ -43,57 +43,84 @@ const TaskCard = ({ task, projectId, sectionName, fetchProjects }) => {
     }
   };
 
-  const handleEdit = () => {
-    setIsEditing(true);
-  };
-
-  const handleSave = async () => {
+  const checkPermissions = async (permissionType) => {
     const user = auth.currentUser;
     if (user) {
-      const projectRef = doc(db, "projects", projectId);
+      const projectRef = doc(db, 'projects', projectId);
       const projectDoc = await getDoc(projectRef);
       if (projectDoc.exists()) {
         const projectData = projectDoc.data();
-        if (projectData.contributors.includes(user.uid)) {
-          const updatedCategories = {
-            ...projectData.categories,
-            [sectionName]: projectData.categories[sectionName].map((t) =>
-              t.id === task.id ? { ...t, ...editedTask } : t
-            )
-          };
-          await updateDoc(projectRef, { categories: updatedCategories });
-          setIsEditing(false);
-          fetchProjects(user.uid); // Refresh projects after editing task
-        } else {
-          alert("You do not have permission to edit this task.");
+        // Admin has all permissions
+        if (projectData.admin === user.uid) return true;
+        return projectData.permissions?.[user.uid]?.[permissionType];
+      }
+    }
+    return false;
+  };
+
+  const handleEdit = async () => {
+    if (await checkPermissions('canEditTasks')) {
+      setIsEditing(true);
+    } else {
+      alert('You do not have permission to edit tasks.');
+    }
+  };
+
+  const handleSave = async () => {
+    if (await checkPermissions('canEditTasks')) {
+      const user = auth.currentUser;
+      if (user) {
+        const projectRef = doc(db, "projects", projectId);
+        const projectDoc = await getDoc(projectRef);
+        if (projectDoc.exists()) {
+          const projectData = projectDoc.data();
+          if (projectData.contributors.includes(user.uid)) {
+            const updatedCategories = {
+              ...projectData.categories,
+              [sectionName]: projectData.categories[sectionName].map((t) =>
+                t.id === task.id ? { ...t, ...editedTask } : t
+              )
+            };
+            await updateDoc(projectRef, { categories: updatedCategories });
+            setIsEditing(false);
+            fetchProjects(user.uid); // Refresh projects after editing task
+          } else {
+            alert("You do not have permission to edit this task.");
+          }
         }
       }
+    } else {
+      alert('You do not have permission to save changes to this task.');
     }
   };
 
   const handleDelete = async () => {
-    const user = auth.currentUser;
-    if (user) {
-      const userDocRef = doc(db, "users", user.uid);
-      const userDoc = await getDoc(userDocRef);
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        const updatedProjects = userData.projects.map((project) => {
-          if (project.id === projectId) {
-            const updatedCategories = {
-              ...project.categories,
-              [sectionName]: project.categories[sectionName].filter((t) => t.id !== task.id)
-            };
-            return {
-              ...project,
-              categories: updatedCategories
-            };
-          }
-          return project;
-        });
-        await updateDoc(userDocRef, { projects: updatedProjects });
-        fetchProjects(user.uid); // Refresh projects after deleting task
+    if (await checkPermissions('canDeleteTasks')) {
+      const user = auth.currentUser;
+      if (user) {
+        const userDocRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          const updatedProjects = userData.projects.map((project) => {
+            if (project.id === projectId) {
+              const updatedCategories = {
+                ...project.categories,
+                [sectionName]: project.categories[sectionName].filter((t) => t.id !== task.id)
+              };
+              return {
+                ...project,
+                categories: updatedCategories
+              };
+            }
+            return project;
+          });
+          await updateDoc(userDocRef, { projects: updatedProjects });
+          fetchProjects(user.uid); // Refresh projects after deleting task
+        }
       }
+    } else {
+      alert('You do not have permission to delete tasks.');
     }
   };
 

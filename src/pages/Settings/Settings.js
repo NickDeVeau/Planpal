@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { getAuth, signOut, deleteUser, onAuthStateChanged } from "firebase/auth";
-import { doc, deleteDoc, updateDoc, getDoc } from "firebase/firestore";
+import { doc, deleteDoc, updateDoc, getDoc, collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "../../firebase";
 import { useNavigate } from "react-router-dom";
 import "../../global.css";
@@ -12,6 +12,8 @@ const Settings = () => {
   const [profilePicture, setProfilePicture] = useState(null);
   const [username, setUsername] = useState('');
   const [user, setUser] = useState(null); // Add state for user
+  const [projects, setProjects] = useState([]); // Add state for projects
+  const [contributorEmails, setContributorEmails] = useState({}); // Add state for contributor emails
   const auth = getAuth();
   const navigate = useNavigate();
 
@@ -37,6 +39,32 @@ const Settings = () => {
       }
     };
     fetchProfileData();
+  }, [user]);
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      if (user) {
+        const q = query(collection(db, "projects"), where("contributors", "array-contains", user.uid));
+        const querySnapshot = await getDocs(q);
+        const projectsData = [];
+        const emails = {};
+        for (const docSnapshot of querySnapshot.docs) {
+          const projectData = docSnapshot.data();
+          projectsData.push({ id: docSnapshot.id, ...projectData });
+          for (const contributorId of projectData.contributors) {
+            if (!emails[contributorId]) {
+              const contributorDoc = await getDoc(doc(db, "users", contributorId));
+              if (contributorDoc.exists()) {
+                emails[contributorId] = contributorDoc.data().email;
+              }
+            }
+          }
+        }
+        setProjects(projectsData);
+        setContributorEmails(emails);
+      }
+    };
+    fetchProjects();
   }, [user]);
 
   const handleSignOut = async () => {
@@ -80,6 +108,31 @@ const Settings = () => {
     }
   };
 
+  const handlePermissionChange = async (projectId, contributorId, permission, value) => {
+    const projectRef = doc(db, "projects", projectId);
+    const projectDoc = await getDoc(projectRef);
+    if (projectDoc.exists()) {
+      const projectData = projectDoc.data();
+      const updatedPermissions = {
+        ...projectData.permissions,
+        [contributorId]: {
+          ...projectData.permissions[contributorId],
+          [permission]: value,
+        },
+      };
+      await updateDoc(projectRef, { permissions: updatedPermissions });
+
+      // Update state to reflect changes immediately
+      setProjects((prevProjects) =>
+        prevProjects.map((project) =>
+          project.id === projectId
+            ? { ...project, permissions: updatedPermissions }
+            : project
+        )
+      );
+    }
+  };
+
   const renderSection = () => {
     switch (selectedSection) {
       case "profile":
@@ -105,6 +158,80 @@ const Settings = () => {
           <div className="settings-content">
             <h3>Notification Settings</h3>
             {/* Add notification settings options here */}
+          </div>
+        );
+      case "shared-projects":
+        return (
+          <div className="settings-content">
+            <h3>Shared Projects</h3>
+            {projects
+              .filter(project => project.type === "shared" && project.admin === user.uid)
+              .map(project => (
+                <div key={project.id} className="project-permissions">
+                  <h4>{project.name}</h4>
+                  {project.contributors.map(contributorId => (
+                    <div key={contributorId} className="contributor-permissions">
+                      <span>{contributorEmails[contributorId]}</span>
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={project.permissions?.[contributorId]?.canEditTasks || false}
+                          onChange={(e) => handlePermissionChange(project.id, contributorId, "canEditTasks", e.target.checked)}
+                        />
+                        Can Edit Tasks
+                      </label>
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={project.permissions?.[contributorId]?.canAddTasks || false}
+                          onChange={(e) => handlePermissionChange(project.id, contributorId, "canAddTasks", e.target.checked)}
+                        />
+                        Can Add Tasks
+                      </label>
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={project.permissions?.[contributorId]?.canDeleteTasks || false}
+                          onChange={(e) => handlePermissionChange(project.id, contributorId, "canDeleteTasks", e.target.checked)}
+                        />
+                        Can Delete Tasks
+                      </label>
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={project.permissions?.[contributorId]?.canEditEvents || false}
+                          onChange={(e) => handlePermissionChange(project.id, contributorId, "canEditEvents", e.target.checked)}
+                        />
+                        Can Edit Events
+                      </label>
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={project.permissions?.[contributorId]?.canAddEvents || false}
+                          onChange={(e) => handlePermissionChange(project.id, contributorId, "canAddEvents", e.target.checked)}
+                        />
+                        Can Add Events
+                      </label>
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={project.permissions?.[contributorId]?.canDeleteEvents || false}
+                          onChange={(e) => handlePermissionChange(project.id, contributorId, "canDeleteEvents", e.target.checked)}
+                        />
+                        Can Delete Events
+                      </label>
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={project.permissions?.[contributorId]?.canEditSections || false}
+                          onChange={(e) => handlePermissionChange(project.id, contributorId, "canEditSections", e.target.checked)}
+                        />
+                        Can Edit Sections
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              ))}
           </div>
         );
       default:
@@ -137,6 +264,12 @@ const Settings = () => {
             onClick={() => setSelectedSection("notifications")}
           >
             Notifications
+          </li>
+          <li
+            className={selectedSection === "shared-projects" ? "active" : ""}
+            onClick={() => setSelectedSection("shared-projects")}
+          >
+            Shared Projects
           </li>
         </ul>
         <button className="back-btn" onClick={() => navigate("/dashboard")}>

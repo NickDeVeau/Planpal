@@ -118,6 +118,17 @@ const Dashboard = () => {
           events: [],
           admin: user.uid,
           contributors: [user.uid],
+          permissions: { 
+            [user.uid]: {
+              canEditTasks: true,
+              canAddTasks: true,
+              canDeleteTasks: true,
+              canEditEvents: true,
+              canAddEvents: true,
+              canDeleteEvents: true,
+              canEditSections: true,
+            }
+          },
         };
         await setDoc(newProjectRef, newProject);
         fetchProjects(user.uid); // Refresh projects after adding a new project
@@ -128,74 +139,101 @@ const Dashboard = () => {
     }
   };
 
-  const addTask = async (projectId, sectionName) => {
-    if (newTaskTitle) {
-      const projectRef = doc(db, "projects", projectId);
+  const checkPermissions = async (projectId, permissionType) => {
+    const user = auth.currentUser;
+    if (user) {
+      const projectRef = doc(db, 'projects', projectId);
       const projectDoc = await getDoc(projectRef);
       if (projectDoc.exists()) {
         const projectData = projectDoc.data();
-        const updatedCategories = {
-          ...projectData.categories,
-          [sectionName]: [
-            ...(projectData.categories[sectionName] || []),
-            {
-              id: new Date().getTime().toString(),
-              title: newTaskTitle,
-              completed: false,
-              priority: "low",
-              description: "",
-              dueDate: ""
-            }
-          ]
-        };
-        await updateDoc(projectRef, { categories: updatedCategories });
-        setShowTaskModal(false);
-        setNewTaskTitle("");
+        // Admin has all permissions
+        if (projectData.admin === user.uid) return true;
+        return projectData.permissions?.[user.uid]?.[permissionType];
+      }
+    }
+    return false;
+  };
+
+  const addTask = async (projectId, sectionName) => {
+    if (newTaskTitle) {
+      if (await checkPermissions(projectId, 'canAddTasks')) {
+        const projectRef = doc(db, "projects", projectId);
+        const projectDoc = await getDoc(projectRef);
+        if (projectDoc.exists()) {
+          const projectData = projectDoc.data();
+          const updatedCategories = {
+            ...projectData.categories,
+            [sectionName]: [
+              ...(projectData.categories[sectionName] || []),
+              {
+                id: new Date().getTime().toString(),
+                title: newTaskTitle,
+                completed: false,
+                priority: "low",
+                description: "",
+                dueDate: ""
+              }
+            ]
+          };
+          await updateDoc(projectRef, { categories: updatedCategories });
+          setShowTaskModal(false);
+          setNewTaskTitle("");
+        }
+      } else {
+        alert('You do not have permission to add tasks.');
       }
     }
   };
 
   const addEvent = async (projectId) => {
     if (newEventTitle) {
-      const projectRef = doc(db, "projects", projectId);
-      const projectDoc = await getDoc(projectRef);
-      if (projectDoc.exists()) {
-        const projectData = projectDoc.data();
-        const updatedEvents = [
-          ...(projectData.events || []),
-          {
-            id: new Date().getTime().toString(),
-            title: newEventTitle,
-            date: "",
-            duration: "all-day",
-            priority: "low",
-            description: ""
-          }
-        ];
-        await updateDoc(projectRef, { events: updatedEvents });
-        setShowEventModal(false);
-        setNewEventTitle("");
+      if (await checkPermissions(projectId, 'canAddEvents')) {
+        const projectRef = doc(db, "projects", projectId);
+        const projectDoc = await getDoc(projectRef);
+        if (projectDoc.exists()) {
+          const projectData = projectDoc.data();
+          const updatedEvents = [
+            ...(projectData.events || []),
+            {
+              id: new Date().getTime().toString(),
+              title: newEventTitle,
+              date: "",
+              duration: "all-day",
+              priority: "low",
+              description: ""
+            }
+          ];
+          await updateDoc(projectRef, { events: updatedEvents });
+          setShowEventModal(false);
+          setNewEventTitle("");
+        }
+      } else {
+        alert('You do not have permission to add events.');
       }
     }
   };
 
   const addSection = async (projectId) => {
     if (newSectionName) {
-      const projectRef = doc(db, "projects", projectId);
-      const projectDoc = await getDoc(projectRef);
-      if (projectDoc.exists()) {
-        const projectData = projectDoc.data();
-        if (projectData.contributors.includes(auth.currentUser.uid)) {
-          const updatedCategories = {
-            ...projectData.categories,
-            [newSectionName]: []
-          };
-          await updateDoc(projectRef, { categories: updatedCategories });
-          setShowSectionModal(false);
-          setNewSectionName("");
-        } else {
-          alert("You do not have permission to add a section to this project.");
+      if (await checkPermissions(projectId, 'canEditSections')) {
+        const projectRef = doc(db, "projects", projectId);
+        const projectDoc = await getDoc(projectRef);
+        if (projectDoc.exists()) {
+          const projectData = projectDoc.data();
+          if (projectData.contributors.includes(auth.currentUser.uid)) {
+            const updatedCategories = {
+              ...projectData.categories,
+              [newSectionName]: []
+            };
+            await updateDoc(projectRef, { categories: updatedCategories });
+            setShowSectionModal(false);
+            setNewSectionName("");
+          } else {
+            alert("You do not have permission to add a section to this project.");
+          }
         }
+      } else {
+        alert('You do not have permission to add sections.');
       }
     }
   };
@@ -214,6 +252,15 @@ const Dashboard = () => {
           const projectRef = doc(db, "projects", projectId);
           await updateDoc(projectRef, {
             contributors: arrayUnion(contributorId),
+            [`permissions.${contributorId}`]: {
+              canEditTasks: false,
+              canAddTasks: false,
+              canDeleteTasks: false,
+              canEditEvents: false,
+              canAddEvents: false,
+              canDeleteEvents: false,
+              canEditSections: false,
+            },
           });
 
           setShowAddContributorModal(false);
@@ -270,24 +317,28 @@ const Dashboard = () => {
   };
 
   const handleDeleteProject = async () => {
-    const user = auth.currentUser;
-    if (user && selectedProjectId) {
-      const projectRef = doc(db, "projects", selectedProjectId);
-      const projectDoc = await getDoc(projectRef);
-      if (projectDoc.exists()) {
-        const projectData = projectDoc.data();
-        if (projectData.admin === user.uid) {
-          // Delete the entire project
-          await deleteDoc(projectRef);
-        } else {
-          // Remove user from contributors array
-          await updateDoc(projectRef, {
-            contributors: arrayRemove(user.uid),
-          });
+    if (await checkPermissions(selectedProjectId, 'canDeleteProject')) {
+      const user = auth.currentUser;
+      if (user && selectedProjectId) {
+        const projectRef = doc(db, "projects", selectedProjectId);
+        const projectDoc = await getDoc(projectRef);
+        if (projectDoc.exists()) {
+          const projectData = projectDoc.data();
+          if (projectData.admin === user.uid) {
+            // Delete the entire project
+            await deleteDoc(projectRef);
+          } else {
+            // Remove user from contributors array
+            await updateDoc(projectRef, {
+              contributors: arrayRemove(user.uid),
+            });
+          }
+          setShowDeleteProjectModal(false);
+          setShowProjectOptions(false);
         }
-        setShowDeleteProjectModal(false);
-        setShowProjectOptions(false);
       }
+    } else {
+      alert('You do not have permission to delete this project.');
     }
   };
 

@@ -204,7 +204,9 @@ body, html {
   font-size: 1.5rem;
   cursor: pointer;
   position: relative;
+ 
 }
+
 
 .options-menu {
   position: absolute;
@@ -253,13 +255,6 @@ body, html {
 .due-date {
   margin-left: auto;
   margin-right: 1rem;
-}
-
-/* Completed State */
-.completed {
-  text-decoration: line-through;
-  color: grey;
-  opacity: 0.6;
 }
 
 .task-header input[type="text"],
@@ -339,14 +334,15 @@ body, html {
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  background-color: #28a745;
-  color: white;
-  transition: background-color 0.3s;
+  background-color: transparent;
+  box-shadow: none;
+  color: black;
+  
+  transition: none;
+  font-size: 150%;
 }
 
-.task-header button:hover {
-  background-color: #218838;
-}
+
 
 .task-header button:active {
   background-color: #1e7e34;
@@ -437,3 +433,4 @@ body, html {
 .modal-content .save-btn:active {
   background-color: #1e7e34;
 }
+

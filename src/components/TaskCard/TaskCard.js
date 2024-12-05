@@ -181,7 +181,7 @@ const TaskCard = ({ task, projectId, sectionName, fetchProjects }) => {
             </span>
           </h4>
           <span className="due-date">Due: {task.dueDate}</span>
-          <button className="options-btn" onClick={toggleOptions}>⋮</button>
+          <button className="task-options-btn2" onClick={toggleOptions}>⋮</button>
           {showOptions && (
             <div className="options-menu" ref={optionsRef}>
               <div className="option" onClick={handleEdit}>Edit</div>

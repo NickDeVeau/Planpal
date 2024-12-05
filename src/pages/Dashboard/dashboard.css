@@ -327,7 +327,7 @@ button:active {
 
 /* Apply and Cancel Buttons inside Modals */
 .modal-content .apply-btn {
-  background-color: var(--success-color);
+  background-color: #28a745;
   color: #fff;
   border: none;
   padding: 0.6rem 1rem;

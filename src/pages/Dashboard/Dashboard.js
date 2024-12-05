@@ -106,6 +106,22 @@ const Dashboard = () => {
     return () => unsubscribe();
   }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showDeleteProjectModal && !document.querySelector('.modal-content').contains(event.target)) {
+        setShowDeleteProjectModal(false);
+      }
+      if (showProjectOptions && !document.querySelector('.options-menu').contains(event.target)) {
+        setShowProjectOptions(false);
+      }
+    };
+  
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showDeleteProjectModal, showProjectOptions]);
+
   const addProject = async () => {
     if (newProjectName) {
       const user = auth.currentUser;

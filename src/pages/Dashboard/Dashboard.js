@@ -4,7 +4,7 @@ import "./dashboard.css";
 import TaskCard from "../../components/TaskCard/TaskCard";
 import EventCard from "../../components/EventCard/EventCard";
 import { db } from "../../firebase"; // Import Firestore
-import { doc, updateDoc, getDoc, query, where, collection, getDocs } from "firebase/firestore"; // Import Firestore functions
+import { doc, updateDoc, getDoc, query, where, collection, getDocs, onSnapshot, arrayUnion, arrayRemove, setDoc, deleteDoc } from "firebase/firestore"; // Update imports
 import { onAuthStateChanged } from "firebase/auth"; // Import onAuthStateChanged
 import { getAuth } from "firebase/auth";
 
@@ -55,18 +55,20 @@ const Dashboard = () => {
   };
 
   // Fetch Projects from Firestore
-  const fetchProjects = async (userId) => {
-    const userDoc = await getDoc(doc(db, "users", userId));
-    if (userDoc.exists()) {
-      const userData = userDoc.data();
-      const projects = userData.projects || [];
-      setProjects(projects);
+  const fetchProjects = (userId) => {
+    const q = query(collection(db, "projects"), where("contributors", "array-contains", userId));
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const projectsData = [];
+      querySnapshot.forEach((doc) => {
+        projectsData.push({ id: doc.id, ...doc.data() });
+      });
+      setProjects(projectsData);
 
-      // Extract all tasks from all projects' categories
+      // Extract tasks and events from projects
       const allTasks = [];
       const allEvents = [];
 
-      projects.forEach((project) => {
+      projectsData.forEach((project) => {
         // Extract tasks from categories
         if (project.categories) {
           Object.entries(project.categories).forEach(([sectionName, tasks]) => {
@@ -86,7 +88,9 @@ const Dashboard = () => {
 
       setTasks(allTasks);
       setEvents(allEvents);
-    }
+    });
+
+    // Store unsubscribe function if needed for cleanup
   };
 
   useEffect(() => {
@@ -106,103 +110,71 @@ const Dashboard = () => {
     if (newProjectName) {
       const user = auth.currentUser;
       if (user) {
-        const userDocRef = doc(db, "users", user.uid);
-        const userDoc = await getDoc(userDocRef);
-        if (userDoc.exists()) {
-          const userData = userDoc.data();
-          const newProject = {
-            id: new Date().getTime().toString(), // Generate a unique ID for the project
-            name: newProjectName,
-            type: isSharedProject ? "shared" : "personal", // Set project type based on checkbox
-            categories: {},
-            events: [],
-            admin: user.uid, // Set the current user as the admin
-            contributors: isSharedProject ? [user.uid] : [] // Initialize contributors array
-          };
-          const updatedProjects = [...(userData.projects || []), newProject];
-          await updateDoc(userDocRef, { projects: updatedProjects });
-          fetchProjects(user.uid); // Refresh projects after adding a new project
-          setShowProjectModal(false);
-          setNewProjectName("");
-          setIsSharedProject(false); // Reset shared project state
-        }
+        const newProjectRef = doc(collection(db, "projects"));
+        const newProject = {
+          name: newProjectName,
+          type: isSharedProject ? "shared" : "personal",
+          categories: {},
+          events: [],
+          admin: user.uid,
+          contributors: [user.uid],
+        };
+        await setDoc(newProjectRef, newProject);
+        fetchProjects(user.uid); // Refresh projects after adding a new project
+        setShowProjectModal(false);
+        setNewProjectName("");
+        setIsSharedProject(false);
       }
     }
   };
 
   const addTask = async (projectId, sectionName) => {
     if (newTaskTitle) {
-      const user = auth.currentUser;
-      if (user) {
-        const userDocRef = doc(db, "users", user.uid);
-        const userDoc = await getDoc(userDocRef);
-        if (userDoc.exists()) {
-          const userData = userDoc.data();
-          const updatedProjects = userData.projects.map((project) => {
-            if (project.id === projectId) {
-              const updatedCategories = {
-                ...project.categories,
-                [sectionName]: [
-                  ...(project.categories[sectionName] || []),
-                  {
-                    id: new Date().getTime().toString(),
-                    title: newTaskTitle,
-                    completed: false,
-                    priority: "low",
-                    description: "",
-                    dueDate: ""
-                  }
-                ]
-              };
-              return {
-                ...project,
-                categories: updatedCategories
-              };
+      const projectRef = doc(db, "projects", projectId);
+      const projectDoc = await getDoc(projectRef);
+      if (projectDoc.exists()) {
+        const projectData = projectDoc.data();
+        const updatedCategories = {
+          ...projectData.categories,
+          [sectionName]: [
+            ...(projectData.categories[sectionName] || []),
+            {
+              id: new Date().getTime().toString(),
+              title: newTaskTitle,
+              completed: false,
+              priority: "low",
+              description: "",
+              dueDate: ""
             }
-            return project;
-          });
-          await updateDoc(userDocRef, { projects: updatedProjects });
-          fetchProjects(user.uid); // Refresh projects after adding a new task
-          setShowTaskModal(false);
-          setNewTaskTitle("");
-        }
+          ]
+        };
+        await updateDoc(projectRef, { categories: updatedCategories });
+        setShowTaskModal(false);
+        setNewTaskTitle("");
       }
     }
   };
 
   const addEvent = async (projectId) => {
     if (newEventTitle) {
-      const user = auth.currentUser;
-      if (user) {
-        const userDocRef = doc(db, "users", user.uid);
-        const userDoc = await getDoc(userDocRef);
-        if (userDoc.exists()) {
-          const userData = userDoc.data();
-          const updatedProjects = userData.projects.map((project) => {
-            if (project.id === projectId) {
-              const updatedEvents = [
-                ...project.events,
-                {
-                  id: new Date().getTime().toString(),
-                  title: newEventTitle,
-                  date: "",
-                  duration: "all-day",
-                  priority: "low",
-                  description: ""
-                }
-              ];
-              return {
-                ...project,
-                events: updatedEvents
-              };
-            }
-            return project;
-          });
-          await updateDoc(userDocRef, { projects: updatedProjects });
-          fetchProjects(user.uid); // Refresh projects after adding a new event
-          setShowEventModal(false);
-          setNewEventTitle("");
-        }
+      const projectRef = doc(db, "projects", projectId);
+      const projectDoc = await getDoc(projectRef);
+      if (projectDoc.exists()) {
+        const projectData = projectDoc.data();
+        const updatedEvents = [
+          ...(projectData.events || []),
+          {
+            id: new Date().getTime().toString(),
+            title: newEventTitle,
+            date: "",
+            duration: "all-day",
+            priority: "low",
+            description: ""
+          }
+        ];
+        await updateDoc(projectRef, { events: updatedEvents });
+        setShowEventModal(false);
+        setNewEventTitle("");
       }
     }
   };
@@ -243,25 +215,17 @@ const Dashboard = () => {
         const q = query(collection(db, "users"), where("email", "==", contributorEmail));
         const querySnapshot = await getDocs(q);
         if (!querySnapshot.empty) {
-          const contributorDoc = querySnapshot.docs[0];
-          const userDocRef = doc(db, "users", user.uid);
-          const userDoc = await getDoc(userDocRef);
-          if (userDoc.exists()) {
-            const userData = userDoc.data();
-            const updatedProjects = userData.projects.map((project) => {
-              if (project.id === projectId) {
-                return {
-                  ...project,
-                  contributors: [...project.contributors, contributorDoc.id]
-                };
-              }
-              return project;
-            });
-            await updateDoc(userDocRef, { projects: updatedProjects });
-            fetchProjects(user.uid); // Refresh projects after adding a contributor
-            setShowAddContributorModal(false);
-            setContributorEmail("");
-          }
+          const contributorDocSnapshot = querySnapshot.docs[0];
+          const contributorId = contributorDocSnapshot.id;
+
+          // Update the project's contributors array
+          const projectRef = doc(db, "projects", projectId);
+          await updateDoc(projectRef, {
+            contributors: arrayUnion(contributorId),
+          });
+
+          setShowAddContributorModal(false);
+          setContributorEmail("");
         } else {
           alert("Contributor email does not exist.");
         }
@@ -316,13 +280,19 @@ const Dashboard = () => {
   const handleDeleteProject = async () => {
     const user = auth.currentUser;
     if (user && selectedProjectId) {
-      const userDocRef = doc(db, "users", user.uid);
-      const userDoc = await getDoc(userDocRef);
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        const updatedProjects = userData.projects.filter((project) => project.id !== selectedProjectId);
-        await updateDoc(userDocRef, { projects: updatedProjects });
-        fetchProjects(user.uid); // Refresh projects after deleting a project
+      const projectRef = doc(db, "projects", selectedProjectId);
+      const projectDoc = await getDoc(projectRef);
+      if (projectDoc.exists()) {
+        const projectData = projectDoc.data();
+        if (projectData.admin === user.uid) {
+          // Delete the entire project
+          await deleteDoc(projectRef);
+        } else {
+          // Remove user from contributors array
+          await updateDoc(projectRef, {
+            contributors: arrayRemove(user.uid),
+          });
+        }
         setShowDeleteProjectModal(false);
         setShowProjectOptions(false);
       }

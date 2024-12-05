@@ -448,11 +448,11 @@ const Dashboard = () => {
             {projects.map((project) => (
               <li
                 key={project.id}
-                className={selectedTab === project.id ? "active" : ""}
+                className= "project-tab"
                 onClick={() => setSelectedTab(project.id)}
               >
                 {project.name} {project.type === "shared" && <span>(Shared)</span>}
-                <button className="options-btn" onClick={(e) => toggleProjectOptions(e, project.id)}>⋮</button>
+                <button className="prj-options-btn" onClick={(e) => toggleProjectOptions(e, project.id)}>⋮</button>
               </li>
             ))}
           </ul>

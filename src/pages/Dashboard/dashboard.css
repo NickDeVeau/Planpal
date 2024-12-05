@@ -194,6 +194,12 @@ body, html {
   border-radius: var(--input-radius);
   background-color: #ffffff;
   cursor: pointer;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.sort-select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 5px rgba(30, 58, 138, 0.5);
 }
 
 /* Buttons - Common Style */
@@ -252,7 +258,7 @@ button:active {
 }
 .due-date, .event-date {
   font-size: 0.9rem;
-  color: var(--medium-text-color);
+  color: var (--medium-text-color);
 }
 .task-description, .event-description {
   font-size: 0.95rem;
@@ -372,6 +378,25 @@ button:active {
 }
 .delete-option {
   color: var(--danger-color);
+}
+
+.prj-options-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  position: relative;
+  box-shadow: none;
+  margin-left: auto; /* Push the button to the right */
+  display: flex;
+  align-items: center; /* Vertically center the button */
+  justify-content: center; /* Center horizontally */
+}
+
+.project-tab {
+  display: flex; /* Use flexbox */
+  align-items: center; /* Vertically center the content */
+  margin-bottom: 1rem;
 }
 
 /* Contributors */

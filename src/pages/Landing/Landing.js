@@ -6,7 +6,7 @@ const Landing = () => {
   return (
     <div className="landing-container">
       <header className="landing-header">
-        <img src="/logo.svg" alt="PlanPal Logo" className="logo" />
+        <img src="/logo.svg" alt="Planpal Logo" className="logo" />
         <nav>
           <a href="/signin" id="signin-link" data-testid="signin-link">Sign In</a>
           <a href="/register" className="cta-button" id="header-get-started-button" data-testid="header-get-started-button">Get Started</a>
@@ -14,13 +14,13 @@ const Landing = () => {
       </header>
 
       <main className="landing-main">
-        <h1 id="landing-title" data-testid="landing-title">Welcome to PlanPal</h1>
+        <h1 id="landing-title" data-testid="landing-title">Welcome to Planpal</h1>
         <p id="landing-description" data-testid="landing-description">Effortlessly manage your tasks and collaborate in real-time.</p>
         <a href="/register" className="cta-button" id="main-get-started-button" data-testid="main-get-started-button">Start Your Journey</a>
       </main>
 
       <footer className="landing-footer">
-        <p>&copy; 2024 PlanPal. All rights reserved.</p>
+        <p>&copy; 2024 Planpal. All rights reserved.</p>
       </footer>
     </div>
   );

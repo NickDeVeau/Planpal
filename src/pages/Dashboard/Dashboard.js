@@ -418,6 +418,11 @@ const Dashboard = () => {
     }
   };
 
+  const getFormattedDate = () => {
+    const today = new Date();
+    return today.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  };
+
   return (
     <div className="dashboard-container">
       {!isEmailVerified && (
@@ -462,7 +467,7 @@ const Dashboard = () => {
       <main className="main-content">
         {selectedTab === "overview" ? (
           <>
-            <h2>Today's Overview</h2>
+            <h2>Today, {getFormattedDate()}</h2>
             <div className="panel-container">
               {/* Tasks Panel */}
               <div className="panel">
@@ -502,15 +507,22 @@ const Dashboard = () => {
         ) : (
           <>
             <h2>
-              {projects.find((project) => project.id === selectedTab)?.name}
-              <button className="add-contributor-btn" onClick={() => setShowAddContributorModal(true)}>+</button>
-              <div className="contributors-list">
-                {contributorDetails.map((contributor) => (
-                  <div key={contributor.email} className="contributor-item">
-                    <img src={contributor.profilePicture} alt="Contributor Avatar" className="contributor-avatar" />
-                    <span className="contributor-email">{contributor.email.split('@')[0]}</span>
-                  </div>
-                ))}
+              <span className="project-header">
+                {projects.find((project) => project.id === selectedTab)?.name}
+              </span>
+              <div className="contributors-container">
+                <div className="contributors-list">
+                  {contributorDetails.map((contributor, index) => (
+                    <div key={contributor.email} className="contributor-item">
+                      <img src={contributor.profilePicture} alt="Contributor Avatar" className="contributor-avatar" />
+                      <span className="contributor-email">
+                        {contributor.email.split('@')[0]}
+                        {index < contributorDetails.length - 1 && ','}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                <button className="add-contributor-btn" onClick={() => setShowAddContributorModal(true)}>+</button>
               </div>
             </h2>
             <div className="panel-container">

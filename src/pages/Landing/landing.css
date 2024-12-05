@@ -25,8 +25,12 @@ body, html, div, h1, p, a, img {
   border-bottom: 1px solid var(--border-color);
 }
 
-.landing-header .logo {
+.landing-header {
   height: 50px;
+}
+
+.logo{
+  height: 80px;
 }
 
 .landing-header nav a {
@@ -92,4 +96,9 @@ body, html, div, h1, p, a, img {
   padding: 1rem;
   background-color: var(--tertiary-color);
   font-size: 0.9rem;
+}
+
+.large-logo {
+  width: 150px; /* Adjust the size as needed */
+  height: auto;
 }

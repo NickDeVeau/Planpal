@@ -1,11 +1,11 @@
 :root {
-  --primary-color: #6c757d; /* Muted Gray */
+  --primary-color: #1e3a8a;        
   --secondary-color: #f8f9fa; /* Light Gray */
-  --tertiary-color: #e9ecef; /* Very Light Gray */
-  --dark-primary-color: #495057; /* Dark Muted Gray */
+  --tertiary-color: #ffffff; /* Very Light Gray */
+  --dark-primary-color: #162a5b; /* Dark Muted Gray */
   --dark-secondary-color: #dee2e6; /* Medium Gray */
   --text-color: #343a40; /* Dark Gray Text */
-  --border-color: #ced4da; /* Gray Border */
+  --border-color: #dee2e6; /* Gray Border */
   --hover-color: #adb5bd; /* Hover Background Color */
   --button-hover-color: #5a6268; /* Button Hover Color */
   --button-background-color: #6c757d; /* Button Background Color */
@@ -13,17 +13,23 @@
   --button-active-background-color: #545b62; /* Button Active Background Color */
   --success-color: #218838; /* Muted Success Color */
   --warning-color: #e0a800; /* Muted Warning Color */
-  --danger-color: #c82333; /* Muted Danger Color */
+  --danger-color: #dc3545; /* Muted Danger Color */
   --light-text-color: #6c757d; /* Light Text Color */
   --medium-text-color: #495057; /* Medium Text Color */
   --card-bg-color: #f8f9fa; /* Light Gray Card Background */
   --dark-text-color: #343a40; /* Dark Text Color */
   --sidebar-link-bg-color: rgba(0, 0, 0, 0.05); /* Muted Sidebar Link Background */
   --sidebar-link-hover-bg-color: rgba(0, 0, 0, 0.1); /* Muted Sidebar Link Hover Background */
-  --button-text-color: var(--secondary-color); /* Button Text Color */
-  --button-bg-color: var(--primary-color);     /* Button Background Color */
-  --button-hover-bg-color: var(--dark-primary-color); /* Button Hover Background Color */
-  --button-active-bg-color: #545b62;           /* Button Active Background Color */
-  --dark-primary-color: #495057; /* Hover color for primary buttons */
+  --button-text-color: #ffffff; /* Button Text Color */
+  --button-bg-color: #1e3a8a;     /* Button Background Color */
+  --button-hover-bg-color: #1b357a; /* Button Hover Background Color */
+  --button-active-bg-color: #162a5b;           /* Button Active Background Color */
+  --base-font-size: 16px;
+  --base-line-height: 1.5;
+  --card-radius: 6px;
+  --input-radius: 5px;
+  --shadow-light: 0 4px 10px rgba(0,0,0,0.1);
+  --font-family: 'Roboto', sans-serif;
+  --dark-primary-color: #162a5b; /* Hover color for primary buttons */
   --dark-secondary-color: #e2e6ea; /* Hover color for secondary buttons */
 }

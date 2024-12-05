@@ -91,6 +91,10 @@
   margin-top: 0;
 }
 
+.label{
+  margin-top: 20px;
+}
+
 .modal-content button {
   padding: 0.5rem 1rem;
   font-size: 1rem;

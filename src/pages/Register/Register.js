@@ -60,7 +60,7 @@ const Register = () => {
         {error && <p className="error">{error}</p>}
         <button type="submit">Register</button>
       </form>
-      <p>
+      <p className = "label">
         Already have an account? <a href="/signin">Sign in here</a>.
       </p>
       {showSuccessModal && (

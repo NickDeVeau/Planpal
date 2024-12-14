@@ -98,26 +98,23 @@ const TaskCard = ({ task, projectId, sectionName, fetchProjects }) => {
     if (await checkPermissions('canDeleteTasks')) {
       const user = auth.currentUser;
       if (user) {
-        const userDocRef = doc(db, "users", user.uid);
-        const userDoc = await getDoc(userDocRef);
-        if (userDoc.exists()) {
-          const userData = userDoc.data();
-          const updatedProjects = userData.projects.map((project) => {
-            if (project.id === projectId) {
-              const updatedCategories = {
-                ...project.categories,
-                [sectionName]: project.categories[sectionName].filter((t) => t.id !== task.id)
-              };
-              return {
-                ...project,
-                categories: updatedCategories
-              };
-            }
-            return project;
-          });
-          await updateDoc(userDocRef, { projects: updatedProjects });
-          fetchProjects(user.uid); // Refresh projects after deleting task
+        const projectRef = doc(db, "projects", projectId);
+        const projectDoc = await getDoc(projectRef);
+        if (projectDoc.exists()) {
+          const projectData = projectDoc.data();
+          if (projectData.contributors.includes(user.uid)) {
+            const updatedCategories = {
+              ...projectData.categories,
+              [sectionName]: projectData.categories[sectionName].filter((t) => t.id !== task.id)
+            };
+            await updateDoc(projectRef, { categories: updatedCategories });
+            fetchProjects(user.uid); // Refresh projects after deleting task
+          } else {
+            alert("You do not have permission to delete this task.");
+          }
         }
+      } else {
+        console.error("User is not authenticated");
       }
     } else {
       alert('You do not have permission to delete tasks.');

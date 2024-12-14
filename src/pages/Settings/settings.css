@@ -203,3 +203,64 @@
 .modal-content .cancel-btn:active {
   background-color: #545b62;
 }
+
+/* Shared Projects Section */
+.setting-button{
+  margin: 10px;
+}
+.project-permissions {
+  background-color: var(--secondary-color);
+  margin-bottom: 1rem;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.project-permissions h4 {
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+  color: var(--text-color);
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+  padding-bottom: 0.5rem;
+}
+
+.contributor-permissions {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+  background: var(--tertiary-color);
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  transition: background-color 0.3s;
+  border: 1px solid rgba(0,0,0,0.1);
+}
+
+.contributor-permissions:hover {
+  background-color: rgba(255,255,255,0.05);
+}
+
+.contributor-permissions span {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  display: inline-block;
+  color: var(--text-color);
+}
+
+.contributor-permissions label {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: var(--text-color);
+}
+
+.contributor-permissions label:last-of-type {
+  margin-bottom: 0;
+}
+
+.contributor-permissions input[type="checkbox"] {
+  margin-right: 0.5rem;
+  transform: scale(1.1);
+  cursor: pointer;
+}

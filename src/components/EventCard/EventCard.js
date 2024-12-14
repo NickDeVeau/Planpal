@@ -105,20 +105,24 @@ const EventCard = ({ event, projectId, fetchProjects }) => {
     const checkExpiration = () => {
       const now = new Date();
       const eventDate = new Date(event.date);
-      if (event.duration === "all-day" && now > eventDate) {
+      const today = new Date().toISOString().split('T')[0];
+
+      if (event.duration === "all-day" && now > eventDate && event.date !== today) {
         setExpired(true);
       } else if (event.duration === "multiple-days") {
         const endDate = new Date(event.endDate);
-        if (now > endDate) {
+        if (now > endDate && event.endDate !== today) {
           setExpired(true);
         }
       } else if (event.duration === "specific-time") {
         if (event.startTime && event.endTime) {
           const endDateTime = new Date(`${event.date}T${event.endTime}`);
-          if (now > endDateTime) {
+          if (now > endDateTime && event.date !== today) {
             setExpired(true);
           }
         }
+      } else {
+        setExpired(false); // Ensure expired is false if the event is not expired
       }
     };
     checkExpiration();

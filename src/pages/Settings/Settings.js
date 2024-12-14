@@ -149,8 +149,8 @@ const Settings = () => {
         return (
           <div className="settings-content">
             <h3>Account Settings</h3>
-            <button onClick={handleSignOut}>Sign Out</button>
-            <button onClick={() => setShowDeleteModal(true)} className="delete-button">Delete Account</button>
+            <button onClick={handleSignOut} className = "setting-button">Sign Out</button>
+            <button onClick={() => setShowDeleteModal(true)} className="setting-button">Delete Account</button>
           </div>
         );
       case "notifications":
@@ -261,12 +261,7 @@ const Settings = () => {
           >
             Account
           </li>
-          <li
-            className={selectedSection === "notifications" ? "active" : ""}
-            onClick={() => setSelectedSection("notifications")}
-          >
-            Notifications
-          </li>
+         
           <li
             className={selectedSection === "shared-projects" ? "active" : ""}
             onClick={() => setSelectedSection("shared-projects")}

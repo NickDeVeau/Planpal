@@ -13,7 +13,6 @@ const Dashboard = () => {
   const [selectedTab, setSelectedTab] = useState("overview");
   const [tasks, setTasks] = useState([]);
   const [events, setEvents] = useState([]);
-  const [sortOption, setSortOption] = useState("");
   const [showProjectModal, setShowProjectModal] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
   const [showSectionModal, setShowSectionModal] = useState(false);
@@ -300,31 +299,6 @@ const Dashboard = () => {
     }
   };
 
-  const handleSortChange = (e) => {
-    setSortOption(e.target.value);
-    applySort(e.target.value);
-  };
-
-  const applySort = (option) => {
-    let sortedTasks = [...tasks];
-    let sortedEvents = [...events];
-
-    if (option === "priority") {
-      const priorityOrder = { "high": 1, "medium": 2, "low": 3 };
-      sortedTasks.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
-      sortedEvents.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
-    } else if (option === "date") {
-      sortedTasks.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
-      sortedEvents.sort((a, b) => new Date(a.date) - new Date(b.date));
-    } else if (option === "name") {
-      sortedTasks.sort((a, b) => a.title.localeCompare(b.title));
-      sortedEvents.sort((a, b) => a.title.localeCompare(b.title));
-    }
-
-    setTasks(sortedTasks);
-    setEvents(sortedEvents);
-  };
-
   const filterTasksAndEventsForToday = () => {
     const today = new Date().toISOString().split('T')[0]; // Get current date in YYYY-MM-DD format
   
@@ -473,12 +447,6 @@ const Dashboard = () => {
               <div className="panel">
                 <div className="tasks-header">
                   <h3>Tasks</h3>
-                  <select className="sort-select" value={sortOption} onChange={handleSortChange}>
-                    <option value="">Sort By</option>
-                    <option value="priority">Priority</option>
-                    <option value="date">Date</option>
-                    <option value="name">Name</option>
-                  </select>
                 </div>
                 <ul className="tasks-list">
                   {filterTasksAndEventsForToday().tasksForToday.map((task) => (
@@ -490,12 +458,6 @@ const Dashboard = () => {
               {/* Events Panel */}
               <div className="panel">
                 <h3>Events</h3>
-                <select className="sort-select" value={sortOption} onChange={handleSortChange}>
-                  <option value="">Sort By</option>
-                  <option value="priority">Priority</option>
-                  <option value="date">Date</option>
-                  <option value="name">Name</option>
-                </select>
                 <ul className="events-list">
                   {filterTasksAndEventsForToday().eventsForToday.map((event) => (
                     <EventCard key={event.id} event={event} projectId={event.projectId} fetchProjects={fetchProjects} />
@@ -531,12 +493,6 @@ const Dashboard = () => {
                 <div className="tasks-header">
                   <h3>Tasks</h3>
                   <button className="add-section-btn" onClick={() => setShowSectionModal(true)}>+ Add Section</button>
-                  <select className="sort-select" value={sortOption} onChange={handleSortChange}>
-                    <option value="">Sort By</option>
-                    <option value="priority">Priority</option>
-                    <option value="date">Date</option>
-                    <option value="name">Name</option>
-                  </select>
                 </div>
                 {projects.find((project) => project.id === selectedTab)?.categories &&
                   Object.entries(projects.find((project) => project.id === selectedTab).categories).map(
@@ -558,12 +514,6 @@ const Dashboard = () => {
               <div className="panel">
                 <h3>Events</h3>
                 <button className="add-event-btn" onClick={() => setShowEventModal(true)}>+ Add Event</button>
-                <select className="sort-select" value={sortOption} onChange={handleSortChange}>
-                  <option value="">Sort By</option>
-                  <option value="priority">Priority</option>
-                  <option value="date">Date</option>
-                  <option value="name">Name</option>
-                </select>
                 <ul className="events-list">
                   {projects.find((project) => project.id === selectedTab)?.events.map((event) => (
                     <EventCard key={event.id} event={event} projectId={selectedTab} fetchProjects={fetchProjects} />

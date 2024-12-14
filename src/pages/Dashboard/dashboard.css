@@ -189,23 +189,6 @@ body, html {
   font-size: 1.3rem;
 }
 
-/* Sort Select */
-.sort-select {
-  margin-left: auto;
-  padding: 0.5rem;
-  font-size: 1rem;
-  border: 1px solid #dee2e6;
-  border-radius: var(--input-radius);
-  background-color: #ffffff;
-  cursor: pointer;
-  transition: border-color 0.3s, box-shadow 0.3s;
-}
-
-.sort-select:focus {
-  border-color: var(--primary-color);
-  box-shadow: 0 0 5px rgba(30, 58, 138, 0.5);
-}
-
 /* Buttons - Common Style */
 button {
   display: inline-block;
